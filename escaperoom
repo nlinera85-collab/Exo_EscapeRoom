@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaTech en Crisis - Escape Room</title>
+    <style>
+        /* ==================================================
+           DISEÑO VISUAL Y VARIABLES (Estilo Consultora / ExO)
+           ================================================== */
+        :root {
+            --bg-color: #0A1628;
+            --card-bg: #0D1F35;
+            --accent-orange: #FF8C00;
+            --accent-cyan: #00B0F0;
+            --text-main: #E2E8F0;
+            --text-muted: #94A3B8;
+            --border-color: #1E293B;
+            --correct-color: #22C55E;
+            --wrong-color: #EF4444;
+            --warning-color: #EAB308;
+            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        button {
+            cursor: pointer;
+            font-family: inherit;
+            border: none;
+            outline: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Pantallas */
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .screen.active {
+            display: block;
+        }
+
+        /* Tipografía y Textos */
+        h1, h2, h3 { margin-bottom: 15px; font-weight: 700; }
+        p { line-height: 1.6; margin-bottom: 15px; }
+        .text-cyan { color: var(--accent-cyan); }
+        .text-orange { color: var(--accent-orange); }
+
+        /* Pantalla 1: Inicio */
+        .badge-alert {
+            display: inline-block;
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--wrong-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+        .start-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .start-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        .detail-item {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .detail-item strong {
+            display: block;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            margin-top: 4px;
+        }
+        .btn-primary {
+            background-color: var(--accent-cyan);
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 15px 30px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            background-color: #0099d1;
+            transform: translateY(-2px);
+        }
+
+        /* Pantalla 2: Juego */
+        .top-bar {
+            margin-bottom: 20px;
+        }
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: var(--border-color);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-cyan);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .metric-value { font-size: 1.2rem; font-weight: bold; color: var(--accent-cyan); }
+        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        
+        .lives-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .lives-circles { display: flex; gap: 8px; }
+        .life-circle {
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background-color: var(--wrong-color);
+            transition: all 0.3s;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        }
+        .life-circle.lost {
+            background-color: #334155;
+            box-shadow: none;
+        }
+        .lives-status { font-size: 0.9rem; font-weight: 500; }
+
+        .question-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .question-number { font-size: 0.9rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase; }
+        .level-badge {
+            background-color: rgba(255, 140, 0, 0.15);
+            color: var(--accent-orange);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+        }
+
+        .timer-container { margin-bottom: 25px; }
+        .timer-bar-bg {
+            width: 100%; height: 8px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .timer-bar {
+            height: 100%; width: 100%;
+            background-color: var(--accent-cyan);
+            transition: width 1s linear, background-color 0.3s;
+        }
+        .timer-text {
+            text-align: right;
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .timer-text.blink { animation: blink 1s infinite; }
+
+        .narrative {
+            font-style: italic;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-orange);
+            padding-left: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 16px;
+            border-radius: 6px;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .option-btn:hover:not(:disabled) {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-muted);
+        }
+        .option-btn:disabled { cursor: default; opacity: 0.7; }
+        
+        .option-btn.correct { background-color: rgba(34, 197, 94, 0.15); border-color: var(--correct-color); }
+        .option-btn.wrong { background-color: rgba(239, 68, 68, 0.15); border-color: var(--wrong-color); }
+        .option-btn.was-correct { background-color: rgba(234, 179, 8, 0.15); border-color: var(--warning-color); }
+
+        .feedback-box {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 6px;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        .feedback-box.show { display: block; }
+        .feedback-box.success { background-color: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .feedback-box.error { background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .feedback-title { font-weight: bold; margin-bottom: 8px; }
+        
+        .btn-next {
+            display: none;
+            width: 100%;
+            margin-top: 20px;
+            background-color: var(--text-main);
+            color: var(--bg-color);
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 6px;
+        }
+        .btn-next.show { display: block; }
+
+        /* Overlay de Susto (Jumpscare) */
+        .scare-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(139, 0, 0, 0.95);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+        .scare-overlay.show { opacity: 1; pointer-events: all; }
+        .scare-icon {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            animation: shake 0.2s infinite;
+        }
+        .scare-title {
+            font-size: 3rem;
+            color: white;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .scare-subtitle { font-size: 1.5rem; color: #ffcccc; }
+
+        /* Pantalla 3: Derrota */
+        .defeat-screen { text-align: center; padding: 40px 20px; }
+        .animation-container { height: 180px; position: relative; overflow: hidden; margin-bottom: 30px; }
+        .tomb {
+            font-size: 5rem;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) translateY(-200%);
+            opacity: 0;
+        }
+        .tomb.animate { animation: tombDrop 1.2s forwards cubic-bezier(0.25, 1, 0.5, 1); }
+        .worm {
+            font-size: 3rem;
+            position: absolute;
+            bottom: -10px;
+            left: 60%;
+            opacity: 0;
+        }
+        .worm.animate { animation: wormEmerge 1s forwards ease-out 1.8s; }
+        .rip-title { font-size: 3rem; color: var(--wrong-color); margin-bottom: 10px; opacity: 0; }
+        .rip-title.animate { animation: fadeIn 1s forwards 1s; }
+        
+        /* Pantalla 4: Victoria */
+        .victory-screen { text-align: center; padding: 30px 20px; }
+        .emoji-row { font-size: 2rem; margin-bottom: 20px; letter-spacing: 15px; }
+        .trophy { font-size: 5rem; margin-bottom: 20px; display: inline-block; }
+        .trophy.animate { animation: bounce 2s infinite; }
+        .victory-title { font-size: 2.5rem; color: var(--correct-color); margin-bottom: 15px; }
+
+        /* Componentes compartidos finales */
+        .final-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 0%, 100% { color: var(--text-main); } 50% { color: var(--wrong-color); } }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-15px) rotate(-5deg); }
+            40% { transform: translateX(15px) rotate(5deg); }
+            60% { transform: translateX(-15px) rotate(-5deg); }
+            80% { transform: translateX(15px) rotate(5deg); }
+        }
+        @keyframes tombDrop {
+            0% { transform: translateX(-50%) translateY(-200%); opacity: 0; }
+            60% { transform: translateX(-50%) translateY(10%); opacity: 1; }
+            80% { transform: translateX(-50%) translateY(-5%); opacity: 1; }
+            100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        @keyframes wormEmerge {
+            0% { transform: translateY(100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .metrics-grid, .final-stats { grid-template-columns: 1fr; gap: 8px; }
+            .start-card, .question-card { padding: 20px; }
+            .scare-title { font-size: 2rem; }
+            .scare-subtitle { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="scare-overlay" class="scare-overlay">
+        <div id="scare-icon" class="scare-icon">💀</div>
+        <div id="scare-title" class="scare-title">¡VIDA PERDIDA!</div>
+        <div id="scare-subtitle" class="scare-subtitle">NovaTech sangra. Dos chances más.</div>
+    </div>
+
+    <div class="container">
+        
+        <div id="screen-start" class="screen active">
+            <div class="start-card">
+                <div class="badge-alert">Alerta de mercado</div>
+                <h1>NovaTech está en crisis</h1>
+                <p>Sos el nuevo CEO de NovaTech, una empresa familiar con 20 años de historia. Un competidor exponencial acaba de arrebatarles el 30% de la cuota de mercado. Según proyecciones financieras, tenés exactamente 12 meses antes de declarar la insolvencia.</p>
+                <p>Para sobrevivir, el directorio necesita pruebas de que entendés cómo funciona el mundo exponencial. Cada decisión correcta suma credibilidad. Cada error (o demora) destruye valor.</p>
+                <p class="text-orange" style="font-size: 0.9rem;"><em>Atención: El mercado se acelera. El tiempo para tomar decisiones se reduce a medida que avanza la crisis.</em></p>
+                
+                <div class="start-details">
+                    <div class="detail-item">Decisiones clave <strong>15 Preguntas</strong></div>
+                    <div class="detail-item">Tiempo por nivel <strong>25s → 12s</strong></div>
+                    <div class="detail-item">Margen de error <strong>3 Vidas</strong></div>
+                </div>
+                
+                <button class="btn-primary" onclick="startGame()">Asumir el cargo &rarr;</button>
+            </div>
+        </div>
+
+        <div id="screen-game" class="screen">
+            <div class="top-bar">
+                <div class="progress-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Pregunta</div>
+                        <div id="metric-q" class="metric-value">1/15</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Puntos</div>
+                        <div id="metric-score" class="metric-value">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Racha</div>
+                        <div id="metric-streak" class="metric-value">0</div>
+                    </div>
+                </div>
+                <div class="lives-container">
+                    <div class="lives-status" id="lives-text">Empresa saludable</div>
+                    <div class="lives-circles">
+                        <div class="life-circle" id="life-1"></div>
+                        <div class="life-circle" id="life-2"></div>
+                        <div class="life-circle" id="life-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <div class="question-header">
+                    <div id="q-number" class="question-number">Pregunta 1 de 15</div>
+                    <div id="q-badge" class="level-badge">nivel 1 · fundamentos</div>
+                </div>
+                
+                <div class="timer-container">
+                    <div class="timer-bar-bg">
+                        <div id="timer-bar" class="timer-bar"></div>
+                    </div>
+                    <div id="timer-text" class="timer-text">25s</div>
+                </div>
+
+                <div id="q-narrative" class="narrative">Narrativa de contexto...</div>
+                <div id="q-text" class="question-text">Texto de la pregunta...</div>
+                
+                <div class="options-grid" id="options-container">
+                    </div>
+
+                <div id="feedback-box" class="feedback-box">
+                    <div id="feedback-title" class="feedback-title"></div>
+                    <div id="feedback-text"></div>
+                </div>
+
+                <button id="btn-next" class="btn-next" onclick="nextAction()">Siguiente decisión &rarr;</button>
+            </div>
+        </div>
+
+        <div id="screen-defeat" class="screen defeat-screen">
+            <div class="animation-container">
+                <div id="tomb" class="tomb">🪦</div>
+                <div id="worm" class="worm">🪱</div>
+            </div>
+            <h1 id="rip-title" class="rip-title">NovaTech R.I.P.</h1>
+            <p id="defeat-subtitle" class="text-muted" style="font-size: 1.2rem;"></p>
+            
+            <div class="final-stats" style="margin-top: 40px;">
+                <div class="metric-card">
+                    <div class="metric-label">Puntos Finales</div>
+                    <div id="defeat-score" class="metric-value">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Decisiones Correctas</div>
+                    <div id="defeat-correct" class="metric-value">0/15</div>
+                </div>
+            </div>
+            
+            <button class="btn-primary" style="margin-top: 20px; max-width: 300px;" onclick="initGame()">Intentar de nuevo</button>
+        </div>
+
+        <div id="screen-victory" class="screen victory-screen">
+            <div class="emoji-row">🎉✨🚀✨🎉</div>
+            <div id="victory-trophy" class="trophy">🏆</div>
+            <h1 id="victory-title" class="victory-title">NovaTech es una ExO</h1>
+            <p id="victory-msg" style="font-size: 1.1rem; color: var(--text-muted);"></p>
+            <p id="victory-desc" style="margin-top: 20px; padding: 20px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color);"></p>
+
+            <div class="final-stats">
+                <div class="metric-card">
+                    <div class="metric-label">Puntos Finales</div>
+                    <div id="victory-score" class="metric-value">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Aciertos</div>
+                    <div id="victory-correct" class="metric-value">0/15</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Racha Máxima</div>
+                    <div id="victory-streak" class="metric-value">0</div>
+                </div>
+            </div>
+
+            <button class="btn-primary" style="margin-top: 20px; max-width: 300px;" onclick="initGame()">Jugar de nuevo</button>
+        </div>
+
+    </div>
+
+    <script>
+        /* ==================================================
+           BASE DE DATOS DE PREGUNTAS
+           ================================================== */
+        const questionsData = [
+            {
+                level: 1, time: 25, badge: "nivel 1 · fundamentos",
+                narrative: "El directorio te pide que expliques por qué NovaTech perdió clientes tan rápido sin que nadie lo viera venir.",
+                text: "¿Cómo se llama la fase de las Seis D's donde la tecnología disruptiva parece lenta e inofensiva y las empresas incumbentes se confían?",
+                options: [
+                    "Digitalización",
+                    "Decepción",
+                    "Disrupción",
+                    "Desmaterialización"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Exacto. La Decepción es la trampa más peligrosa: la nueva tecnología parece inferior y no amenazante. Es el momento donde NovaTech debió reaccionar, no cuando los clientes ya se fueron.",
+                feedbackWrong: "Era la Decepción. Es la fase más peligrosa porque todo parece tranquilo. NovaTech vivió tres años mirando al competidor sin tomarlo en serio."
+            },
+            {
+                level: 1, time: 25, badge: "nivel 1 · fundamentos",
+                narrative: "Un asesor propone mejorar la eficiencia de NovaTech en un 10% para recuperar clientes perdidos.",
+                text: "Desde la lógica exponencial, ¿cuál es el problema de fondo con esa propuesta?",
+                options: [
+                    "Es demasiado costosa de implementar",
+                    "Mejorar un 10% usa la misma lógica lineal que ya fracasó — necesitás ser 10 veces mejor, no un poco mejor",
+                    "El 10% es poco, debería ser 20%",
+                    "Es un buen punto de partida antes de pensar más grande"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Correcto. Mejorar un 10% es pensamiento lineal aplicado a un problema exponencial. Las ExOs no mejoran el modelo existente: lo cambian radicalmente. Un 10% más eficiente no derrota a un competidor que opera sin activos fijos.",
+                feedbackWrong: "La clave es la lógica lineal. Para competir con una ExO necesitás repensar el modelo desde cero, no optimizar el existente."
+            },
+            {
+                level: 1, time: 25, badge: "nivel 1 · fundamentos",
+                narrative: "El directorio te pregunta qué diferencia a una Organización Exponencial de una empresa simplemente buena.",
+                text: "¿Cuál es la característica central que define a una ExO según Ismail?",
+                options: [
+                    "Tiene más empleados capacitados que sus competidores",
+                    "Su impacto es al menos 10 veces superior al de sus pares, usando recursos externos en lugar de propios",
+                    "Invierte más en tecnología que la industria",
+                    "Tiene presencia internacional desde el inicio"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Exacto. Impacto desproporcionadamente grande —al menos 10x— con una fracción de los recursos, gracias al aprovechamiento de activos externos. No es solo crecer rápido: es crecer sin acumular estructura.",
+                feedbackWrong: "La definición del libro: 10x de impacto usando recursos externos. No es sobre empleados ni tecnología: es sobre la lógica de cómo escalan."
+            },
+            {
+                level: 2, time: 22, badge: "nivel 2 · conceptos clave",
+                narrative: "Tu competidor no tiene ningún activo físico propio pero domina el mercado. El directorio no lo entiende.",
+                text: "Uber no tiene autos, Airbnb no tiene habitaciones. ¿Qué atributo de SCALE describe esta lógica?",
+                options: [
+                    "Staff on Demand",
+                    "Community & Crowd",
+                    "Algorithms",
+                    "Leveraged Assets"
+                ],
+                correctIndex: 3,
+                feedbackCorrect: "Leveraged Assets. En lugar de poseer, acceden. La propiedad genera costos fijos y rigidez; el acceso genera flexibilidad y escala sin límites. Es exactamente lo que hace que tu competidor tenga tarifas 40% menores que NovaTech.",
+                feedbackWrong: "Era Leveraged Assets. Tu competidor no posee los recursos que usa: los accede bajo demanda. Eso elimina los costos fijos que NovaTech arrastra."
+            },
+            {
+                level: 2, time: 22, badge: "nivel 2 · conceptos clave",
+                narrative: "Tu jefe de finanzas propone un nuevo plan estratégico a 5 años para guiar la transformación.",
+                text: "¿Por qué las ExOs abandonaron el plan quinquenal y qué usan en su lugar?",
+                options: [
+                    "Porque es mucho trabajo. Usan hojas de cálculo más simples",
+                    "Porque en un entorno exponencial el mundo cambia más rápido que cualquier plan. Usan OKR en tiempo real + PTM como guía general",
+                    "Porque los inversores no los leen. Usan pitches de una página",
+                    "Porque prefieren no planificar y adaptarse sobre la marcha"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Correcto. El plan quinquenal asume estabilidad que no existe. Las ExOs usan OKR medidos en tiempo real, guiados por un PTM que da dirección sin rigidez. La ejecución supera a la planificación.",
+                feedbackWrong: "El plan quinquenal asume un mundo estable. La solución ExO son OKR en tiempo real + PTM. En el mundo exponencial, el propósito triunfa sobre la estrategia."
+            },
+            {
+                level: 2, time: 22, badge: "nivel 2 · conceptos clave",
+                narrative: "NovaTech tiene 25 años de datos operativos en planillas internas que nadie procesa. Un consultor los llama 'activo dormido'.",
+                text: "¿Qué atributo de SCALE describe el proceso de convertir esos datos en inteligencia predictiva que nadie puede replicar?",
+                options: [
+                    "Engagement",
+                    "Algorithms",
+                    "Interfaces",
+                    "Social Technologies"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Algorithms. Los datos brutos no son el activo: el activo es el modelo entrenado con esos datos. 25 años de historial real es una ventaja que ningún competidor nuevo puede comprar ni construir rápidamente.",
+                feedbackWrong: "Era Algorithms. Los datos en planillas no valen solos. Procesados con algoritmos se convierten en inteligencia predictiva que ningún competidor nuevo puede replicar porque requiere años de datos reales para entrenarse."
+            },
+            {
+                level: 3, time: 18, badge: "nivel 3 · aplicación",
+                narrative: "El equipo de innovación propone un PTM: 'Ser el líder en soluciones de calidad para nuestros clientes'.",
+                text: "¿Por qué eso NO es un PTM según la lógica de Organizaciones Exponenciales?",
+                options: [
+                    "Porque es demasiado corto",
+                    "Porque describe lo que hace la empresa, no el problema del mundo que resuelve. Un PTM genuino responde: ¿para qué existe esta organización más allá del negocio?",
+                    "Porque no menciona tecnología",
+                    "Porque debería estar en inglés para ser más profesional"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Exacto. 'Ser el líder' es descripción del negocio, no propósito transformador. Prueba: ¿tomaría NovaTech una decisión que perjudica su rentabilidad para ser fiel a ese propósito? Si la respuesta es no, no es PTM.",
+                feedbackWrong: "Un PTM responde al impacto en el mundo, no a los objetivos de la empresa. 'Ser el líder' podría decirlo cualquier empresa. Un PTM genuino es tan específico que nadie más puede decir lo mismo."
+            },
+            {
+                level: 3, time: 18, badge: "nivel 3 · aplicación",
+                narrative: "NovaTech quiere lanzar un piloto de transformación. El CFO insiste en esperar a tener todos los datos antes de empezar.",
+                text: "¿Qué atributo de IDEAS explica por qué ese enfoque es el opuesto de la lógica ExO?",
+                options: [
+                    "Autonomy",
+                    "Dashboards",
+                    "Experimentation",
+                    "Social Technologies"
+                ],
+                correctIndex: 2,
+                feedbackCorrect: "Experimentation. La lógica ExO es testear la hipótesis central con el mínimo de inversión posible y aprender de los resultados. Esperar certeza antes de experimentar es la lógica lineal que trajo a esta crisis.",
+                feedbackWrong: "Era Experimentation. Las ExOs no esperan certeza: testean hipótesis rápido y barato. Falla rápido y barato mientras eliminás lo que no sirve. El CFO quiere certeza donde lo único válido es aprender."
+            },
+            {
+                level: 3, time: 18, badge: "nivel 3 · aplicación",
+                narrative: "Un gerente propone un 'comité de innovación' con representantes de todas las áreas para gestionar la transformación.",
+                text: "¿Por qué esa respuesta al sistema inmunológico corporativo probablemente va a fracasar?",
+                options: [
+                    "Porque los comités son lentos",
+                    "Porque un comité integrado por la estructura existente va a defender el status quo. El sistema inmunológico no se vence desde adentro: se rodea con separación real",
+                    "Porque faltan personas de IT",
+                    "Porque debería llamarse 'task force', no comité"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Correcto. Un comité formado por la misma estructura que hay que transformar es el sistema inmunológico con otro nombre. Separación real: presupuesto propio, equipo separado, reporte directo al CEO.",
+                feedbackWrong: "La clave es la separación. Un comité integrado va a priorizar el negocio actual. El sistema inmunológico no se convence: se rodea. Kodak tenía comités de innovación y aun así quebró."
+            },
+            {
+                level: 3, time: 18, badge: "nivel 3 · aplicación",
+                narrative: "NovaTech considera aplicar 'Interfaces' para gestionar la entrada de operadores externos.",
+                text: "¿Cuál es la diferencia real entre Interfaces y simplemente usar un formulario de contacto?",
+                options: [
+                    "No hay diferencia, es lo mismo con mejor nombre",
+                    "Las Interfaces son procesos algorítmicos que filtran, asignan y automatizan la conexión exterior-interior sin intervención manual. Un formulario es burocracia digitalizada",
+                    "Las Interfaces son más baratas de implementar",
+                    "Las Interfaces requieren inteligencia artificial obligatoriamente"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Exacto. La Interfaz permite que la escala externa no destruya la organización interna. Sin ella, cada operador externo genera una cadena manual que colapsa todo. La diferencia entre Airbnb y un hotel con reservas por mail es exactamente esta.",
+                feedbackWrong: "Una Interfaz no es un formulario digital: es el sistema que hace escalar sin agregar personal. Airbnb gestiona millones de reservas sin un equipo para cada una. Eso es una Interfaz real."
+            },
+            {
+                level: 4, time: 15, badge: "nivel 4 · análisis",
+                narrative: "McKinsey predijo menos de 1 millón de celulares para el año 2000. Había 100 millones.",
+                text: "¿Qué principio específico explica por qué analistas brillantes cometen ese error sistemáticamente?",
+                options: [
+                    "Falta de información de mercado",
+                    "El pensamiento lineal aplicado a fenómenos exponenciales. La curva parece plana en la fase de Decepción y luego se dispara de forma que ningún modelo lineal puede predecir",
+                    "Sesgo político en las proyecciones",
+                    "Interés en proteger a las empresas incumbentes"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Correcto. El cerebro proyecta linealmente por defecto. En la Decepción, el crecimiento exponencial es indistinguible del lineal. Vinod Khosla documentó que los mejores analistas del mundo repitieron este error cuatro veces consecutivas.",
+                feedbackWrong: "Es el pensamiento lineal. No fallaron por falta de datos: sus modelos mentales son lineales. La LOAR de Kurzweil describe por qué ocurre en cualquier industria que se digitaliza."
+            },
+            {
+                level: 4, time: 15, badge: "nivel 4 · análisis",
+                narrative: "El competidor de NovaTech tiene 50.000 usuarios que reportan datos en tiempo real de forma voluntaria.",
+                text: "¿Qué atributo de SCALE describe esto y qué lo hace difícil de replicar para NovaTech?",
+                options: [
+                    "Leveraged Assets, porque los usuarios son un activo externo",
+                    "Community & Crowd, porque se construye alrededor de un PTM que convoca personas que contribuyen sin ser empleadas. Sin PTM genuino, no se puede comprar con dinero",
+                    "Engagement, porque los usuarios están comprometidos",
+                    "Algorithms, porque los datos son el verdadero valor"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Community & Crowd. La comunidad no se compra: se convoca alrededor de un propósito. Waze logró que millones reportaran datos de tráfico voluntariamente. Sin PTM genuino, NovaTech no puede replicar eso con presupuesto de marketing.",
+                feedbackWrong: "Era Community & Crowd. La razón por la que es difícil de replicar: la comunidad no se compra. Sin PTM genuino que haga que las personas quieran contribuir, el marketing no alcanza."
+            },
+            {
+                level: 5, time: 12, badge: "nivel 5 · síntesis",
+                narrative: "El directorio está dividido entre tres opciones para NovaTech. Tenés que elegir y justificar en segundos.",
+                text: "NovaTech tiene infraestructura certificada con 60% de capacidad ociosa. ¿Cuál transformación es más coherente con la lógica ExO y más difícil de replicar por un competidor nuevo?",
+                options: [
+                    "Vender la infraestructura y lanzar una app que imite al competidor con mejores precios",
+                    "Abrir la infraestructura como servicio compartido para que otros operadores —incluido el competidor— la usen como plataforma, convirtiéndose en la capa que todos necesitan",
+                    "Reducir precios un 30% para recuperar clientes perdidos",
+                    "Invertir en marketing para comunicar mejor la propuesta de valor existente"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Correcto y sofisticado. No compite con el competidor: lo convierte en cliente. Es la lógica de Amazon Web Services: abrir la infraestructura al mercado, incluso a competidores. Los activos ociosos generan ingreso y el competidor se vuelve dependiente.",
+                feedbackWrong: "La respuesta correcta era abrir la infraestructura. Convertís el mayor costo fijo en fuente de ingreso y al competidor en cliente. Imitar llega tarde. Bajar precios destruye margen. El marketing no cambia el modelo fundamental."
+            },
+            {
+                level: 5, time: 12, badge: "nivel 5 · síntesis",
+                narrative: "Kodak inventó la cámara digital en 1975. Quebró en 2012. NovaTech corre el mismo riesgo.",
+                text: "¿Cuál es el mecanismo concreto que comparten Kodak y NovaTech, más allá de ser 'empresas tradicionales'?",
+                options: [
+                    "Las dos operan en industrias que se digitalizaron",
+                    "Las dos tienen el activo que podría salvarlas pero su sistema inmunológico lo bloquea porque amenaza el negocio que genera ingresos hoy",
+                    "Las dos tienen estructuras jerárquicas rígidas",
+                    "Las dos subestimaron a sus competidores"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Exacto. El sistema inmunológico de Kodak rechazó la cámara digital porque adoptarla destruía los ingresos del negocio de rollos. NovaTech tiene el mismo dilema: la infraestructura que podría salvarla amenaza el negocio que la mantiene viva hoy.",
+                feedbackWrong: "El mecanismo: posesión del activo salvador bloqueada por el sistema inmunológico. No es la jerarquía ni subestimar al competidor: es que el cambio que salvaría a la empresa destruye los ingresos actuales y la organización se protege rechazándolo."
+            },
+            {
+                level: 5, time: 12, badge: "nivel 5 · síntesis",
+                narrative: "NovaTech superó la crisis. El directorio pide la decisión más importante para los próximos años.",
+                text: "Una ExO madura frente a nuevas disrupciones debería principalmente:",
+                options: [
+                    "Crecer en empleados y activos para consolidar el liderazgo",
+                    "Disrumpirse a sí misma continuamente antes de que otros lo hagan, canibalizando sus propios modelos de negocio cuando sea necesario",
+                    "Crear barreras regulatorias y patentes para proteger su posición",
+                    "Diversificarse en industrias no relacionadas para reducir el riesgo"
+                ],
+                correctIndex: 1,
+                feedbackCorrect: "Correcto. Es la lección más profunda del libro. Netflix destruyó su negocio de DVD para construir el de streaming. Tesla abrió sus patentes. La única defensa sostenible en un mundo exponencial es disruptirse a uno mismo antes de que otro lo haga.",
+                feedbackWrong: "La respuesta es disrumpirse a sí misma. Crecer en activos recrea el problema original. Las patentes retrasan pero no previenen. La diversificación sin lógica exponencial multiplica los problemas."
+            }
+        ];
+
+        /* ==================================================
+           ESTADO DEL JUEGO
+           ================================================== */
+        let currentQuestion = 0;
+        let score = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let correctCount = 0;
+        let lives = 3;
+        
+        let timerInterval;
+        let timeLeft = 0;
+        let totalTime = 0;
+        
+        let deathReason = "";
+        let deathQNum = 0;
+
+        /* ==================================================
+           LÓGICA PRINCIPAL
+           ================================================== */
+        
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function initGame() {
+            currentQuestion = 0;
+            score = 0;
+            streak = 0;
+            maxStreak = 0;
+            correctCount = 0;
+            lives = 3;
+            updateMetrics();
+            updateLivesUI();
+            
+            // Reset animaciones derrota/victoria
+            document.getElementById('tomb').classList.remove('animate');
+            document.getElementById('worm').classList.remove('animate');
+            document.getElementById('rip-title').classList.remove('animate');
+            document.getElementById('victory-trophy').classList.remove('animate');
+            
+            showScreen('screen-start');
+        }
+
+        function startGame() {
+            showScreen('screen-game');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            // Reset UI
+            document.getElementById('btn-next').classList.remove('show');
+            document.getElementById('feedback-box').classList.remove('show');
+            
+            const q = questionsData[currentQuestion];
+            
+            // Textos
+            document.getElementById('q-number').textContent = `Pregunta ${currentQuestion + 1} de 15`;
+            document.getElementById('q-badge').textContent = q.badge;
+            document.getElementById('q-narrative').textContent = q.narrative;
+            document.getElementById('q-text').textContent = q.text;
+            
+            // Barra de progreso
+            const progress = (currentQuestion / 15) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            
+            // Opciones
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = `${String.fromCharCode(65 + index)}) ${opt}`;
+                btn.onclick = () => handleAnswer(index);
+                optionsContainer.appendChild(btn);
+            });
+
+            startTimer(q.time);
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            totalTime = seconds;
+            timeLeft = seconds;
+            updateTimerUI();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const bar = document.getElementById('timer-bar');
+            const text = document.getElementById('timer-text');
+            const pct = (timeLeft / totalTime) * 100;
+            
+            bar.style.width = `${pct}%`;
+            text.textContent = `${timeLeft}s`;
+            
+            // Colores
+            if (pct > 50) {
+                bar.style.backgroundColor = 'var(--accent-cyan)';
+            } else if (pct > 25) {
+                bar.style.backgroundColor = 'var(--warning-color)';
+            } else {
+                bar.style.backgroundColor = 'var(--wrong-color)';
+            }
+
+            if (timeLeft <= 5 && timeLeft > 0) {
+                text.classList.add('blink');
+            } else {
+                text.classList.remove('blink');
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-text').classList.remove('blink');
+        }
+
+        function handleAnswer(selectedIndex) {
+            stopTimer();
+            const q = questionsData[currentQuestion];
+            const isCorrect = (selectedIndex === q.correctIndex);
+            
+            if (isCorrect) {
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                
+                let pointsGained = 10;
+                if (streak === 2) pointsGained += 10;
+                if (streak >= 3) pointsGained += 20;
+                score += pointsGained;
+                correctCount++;
+                
+                processFeedback(isCorrect, selectedIndex);
+            } else {
+                streak = 0;
+                lives--;
+                deathReason = "respuesta incorrecta";
+                deathQNum = currentQuestion + 1;
+                
+                showScareOverlay("wrong", () => {
+                    processFeedback(isCorrect, selectedIndex);
+                });
+            }
+        }
+
+        function handleTimeout() {
+            streak = 0;
+            lives--;
+            deathReason = "tiempo agotado";
+            deathQNum = currentQuestion + 1;
+            
+            showScareOverlay("timeout", () => {
+                processFeedback(false, -1);
+            });
+        }
+
+        function processFeedback(isCorrect, selectedIndex) {
+            updateMetrics();
+            updateLivesUI();
+            
+            const q = questionsData[currentQuestion];
+            const btns = document.querySelectorAll('.option-btn');
+            
+            // Deshabilitar y colorear
+            btns.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === q.correctIndex) {
+                    btn.classList.add('correct');
+                    if (selectedIndex === -1) btn.classList.add('was-correct'); // Timeout
+                } else if (idx === selectedIndex) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            // Caja de feedback
+            const fbBox = document.getElementById('feedback-box');
+            const fbTitle = document.getElementById('feedback-title');
+            const fbText = document.getElementById('feedback-text');
+            
+            fbBox.className = 'feedback-box show';
+            if (isCorrect) {
+                fbBox.classList.add('success');
+                fbTitle.textContent = '✓ Correcto';
+                fbTitle.style.color = 'var(--correct-color)';
+                fbText.textContent = q.feedbackCorrect;
+            } else {
+                fbBox.classList.add('error');
+                fbTitle.textContent = selectedIndex === -1 ? '⌛ Tiempo Agotado' : '✗ Incorrecto';
+                fbTitle.style.color = 'var(--wrong-color)';
+                fbText.textContent = q.feedbackWrong;
+            }
+
+            // Botón siguiente
+            const btnNext = document.getElementById('btn-next');
+            if (lives <= 0 || currentQuestion === 14) {
+                btnNext.textContent = "Ver resultado final &rarr;";
+            } else {
+                btnNext.textContent = "Siguiente decisión &rarr;";
+            }
+            btnNext.classList.add('show');
+        }
+
+        function nextAction() {
+            if (lives <= 0) {
+                showDefeat();
+            } else if (currentQuestion === 14) {
+                showVictory();
+            } else {
+                currentQuestion++;
+                loadQuestion();
+            }
+        }
+
+        /* ==================================================
+           EFECTOS Y ACTUALIZACIONES DE UI
+           ================================================== */
+        
+        function updateMetrics() {
+            document.getElementById('metric-q').textContent = `${currentQuestion + 1}/15`;
+            document.getElementById('metric-score').textContent = score;
+            document.getElementById('metric-streak').textContent = streak;
+        }
+
+        function updateLivesUI() {
+            const statusText = document.getElementById('lives-text');
+            for (let i = 1; i <= 3; i++) {
+                const circle = document.getElementById(`life-${i}`);
+                if (i <= lives) circle.classList.remove('lost');
+                else circle.classList.add('lost');
+            }
+            
+            if (lives === 3) {
+                statusText.textContent = "Empresa saludable";
+                statusText.style.color = "var(--text-main)";
+            } else if (lives === 2) {
+                statusText.textContent = "Bajo presión";
+                statusText.style.color = "var(--warning-color)";
+            } else if (lives === 1) {
+                statusText.textContent = "Al borde del colapso";
+                statusText.style.color = "var(--wrong-color)";
+            } else {
+                statusText.textContent = "Bancarrota";
+                statusText.style.color = "#475569";
+            }
+        }
+
+        function showScareOverlay(reason, callback) {
+            const overlay = document.getElementById('scare-overlay');
+            const icon = document.getElementById('scare-icon');
+            const title = document.getElementById('scare-title');
+            const subtitle = document.getElementById('scare-subtitle');
+            
+            if (lives === 2) {
+                if (reason === 'wrong') {
+                    icon.textContent = '💀';
+                    title.textContent = '¡VIDA PERDIDA!';
+                    subtitle.textContent = 'NovaTech sangra. Dos chances más.';
+                } else {
+                    icon.textContent = '⏰';
+                    title.textContent = '¡SE ACABÓ EL TIEMPO!';
+                    subtitle.textContent = 'El mercado no espera. Perdiste una vida.';
+                }
+            } else if (lives === 1) {
+                if (reason === 'wrong') {
+                    icon.textContent = '🔥';
+                    title.textContent = '¡LA EMPRESA SE QUEMA!';
+                    subtitle.textContent = 'Solo te queda una vida. No hay margen.';
+                } else {
+                    icon.textContent = '⌛';
+                    title.textContent = '¡TIEMPO AGOTADO!';
+                    subtitle.textContent = 'Última oportunidad. El directorio te observa.';
+                }
+            } else {
+                icon.textContent = '💥';
+                title.textContent = '¡COLAPSO TOTAL!';
+                subtitle.textContent = 'NovaTech ha quebrado.';
+            }
+
+            overlay.classList.add('show');
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                if(callback) callback();
+            }, 1400);
+        }
+
+        function showDefeat() {
+            showScreen('screen-defeat');
+            document.getElementById('defeat-score').textContent = score;
+            document.getElementById('defeat-correct').textContent = `${correctCount}/15`;
+            document.getElementById('defeat-subtitle').textContent = `La empresa quebró en la pregunta ${deathQNum} por ${deathReason}.`;
+            
+            setTimeout(() => document.getElementById('tomb').classList.add('animate'), 100);
+            setTimeout(() => document.getElementById('worm').classList.add('animate'), 100);
+            setTimeout(() => document.getElementById('rip-title').classList.add('animate'), 100);
+        }
+
+        function showVictory() {
+            showScreen('screen-victory');
+            document.getElementById('victory-score').textContent = score;
+            document.getElementById('victory-correct').textContent = `${correctCount}/15`;
+            document.getElementById('victory-streak').textContent = maxStreak;
+            
+            const pct = (correctCount / 15) * 100;
+            const titleEl = document.getElementById('victory-title');
+            const msgEl = document.getElementById('victory-msg');
+            const descEl = document.getElementById('victory-desc');
+            const trophyEl = document.getElementById('victory-trophy');
+            
+            setTimeout(() => trophyEl.classList.add('animate'), 100);
+
+            if (pct >= 90) {
+                titleEl.textContent = "NovaTech es una ExO";
+                trophyEl.textContent = "🏆";
+                msgEl.textContent = "Superaste la crisis con excelencia.";
+                descEl.textContent = "Demostraste comprensión profunda de la lógica exponencial. Entendés que el mundo cambió de naturaleza y que la única respuesta válida es un modelo completamente distinto. Ismail estaría orgulloso.";
+            } else if (pct >= 70) {
+                titleEl.textContent = "NovaTech sobrevivió";
+                trophyEl.textContent = "🎯";
+                titleEl.style.color = "var(--warning-color)";
+                msgEl.textContent = "Evitaste la quiebra, pero hay trabajo por hacer.";
+                descEl.textContent = "Manejaste bien los conceptos fundamentales. Algunas tensiones internas quedaron sin resolver, pero la dirección es la correcta. Con más práctica, la transformación completa es posible.";
+            } else {
+                titleEl.textContent = "NovaTech resistió, por ahora";
+                trophyEl.textContent = "🌱";
+                titleEl.style.color = "var(--accent-orange)";
+                msgEl.textContent = "Sobreviviste raspando. El mercado sigue acechando.";
+                descEl.textContent = "Entendés los conceptos pero la aplicación al caso concreto todavía tiene margen de crecimiento. La próxima disrupción va a requerir más velocidad y más profundidad de análisis.";
+            }
+        }
+
+        // Iniciar
+        window.onload = initGame;
+    </script>
+</body>
+</html>
