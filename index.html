@@ -3,1093 +3,856 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaTech en Crisis - Escape Room</title>
+    <title>NovaTech — Sala de Crisis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        /* ==================================================
-           DISEÑO VISUAL Y VARIABLES (Estilo Consultora / ExO)
-           ================================================== */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&amp;display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');
+
         :root {
-            --bg-color: #0A1628;
-            --card-bg: #0D1F35;
-            --accent-orange: #FF8C00;
-            --accent-cyan: #00B0F0;
-            --text-main: #E2E8F0;
-            --text-muted: #94A3B8;
-            --border-color: #1E293B;
-            --correct-color: #22C55E;
-            --wrong-color: #EF4444;
-            --warning-color: #EAB308;
-            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --accent: #FF6B00;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--font-main);
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        button {
-            cursor: pointer;
-            font-family: inherit;
-            border: none;
-            outline: none;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        /* Pantallas */
-        .screen {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
-        .screen.active {
-            display: block;
-        }
-
-        /* Tipografía y Textos */
-        h1, h2, h3 { margin-bottom: 15px; font-weight: 700; }
-        p { line-height: 1.6; margin-bottom: 15px; }
-        .text-cyan { color: var(--accent-cyan); }
-        .text-orange { color: var(--accent-orange); }
-
-        /* Pantalla 1: Inicio */
-        .badge-alert {
-            display: inline-block;
-            background-color: rgba(239, 68, 68, 0.2);
-            color: var(--wrong-color);
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(239, 68, 68, 0.4);
-        }
-        .start-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 40px;
-            text-align: left;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .start-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin: 30px 0;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-        .detail-item {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-        .detail-item strong {
-            display: block;
-            color: var(--text-main);
-            font-size: 1.1rem;
-            margin-top: 4px;
-        }
-        .btn-primary {
-            background-color: var(--accent-cyan);
-            color: #fff;
-            font-size: 1.1rem;
-            font-weight: 600;
-            padding: 15px 30px;
-            border-radius: 6px;
-            transition: all 0.2s;
-            width: 100%;
-        }
-        .btn-primary:hover {
-            background-color: #0099d1;
-            transform: translateY(-2px);
-        }
-
-        /* Pantalla 2: Juego */
-        .top-bar {
-            margin-bottom: 20px;
-        }
-        .progress-container {
-            width: 100%;
-            height: 6px;
-            background-color: var(--border-color);
-            border-radius: 3px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            background-color: var(--accent-cyan);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .metric-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .metric-value { font-size: 1.2rem; font-weight: bold; color: var(--accent-cyan); }
-        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
         
-        .lives-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
+        body {
+            font-family: 'Press Start 2P', system-ui;
         }
-        .lives-circles { display: flex; gap: 8px; }
-        .life-circle {
-            width: 16px; height: 16px;
-            border-radius: 50%;
-            background-color: var(--wrong-color);
-            transition: all 0.3s;
-            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        
+        .terminal-font {
+            font-family: 'VT323', monospace;
         }
-        .life-circle.lost {
-            background-color: #334155;
-            box-shadow: none;
-        }
-        .lives-status { font-size: 0.9rem; font-weight: 500; }
 
-        .question-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 30px;
-            margin-bottom: 20px;
+        .scanline {
             position: relative;
         }
-        .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .question-number { font-size: 0.9rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase; }
-        .level-badge {
-            background-color: rgba(255, 140, 0, 0.15);
-            color: var(--accent-orange);
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: 1px solid rgba(255, 140, 0, 0.3);
-        }
-
-        .timer-container { margin-bottom: 25px; }
-        .timer-bar-bg {
-            width: 100%; height: 8px;
-            background-color: var(--border-color);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        .timer-bar {
-            height: 100%; width: 100%;
-            background-color: var(--accent-cyan);
-            transition: width 1s linear, background-color 0.3s;
-        }
-        .timer-text {
-            text-align: right;
-            font-family: monospace;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        .timer-text.blink { animation: blink 1s infinite; }
-
-        .narrative {
-            font-style: italic;
-            color: var(--text-muted);
-            border-left: 3px solid var(--accent-orange);
-            padding-left: 15px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-        .question-text {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 25px;
-        }
-
-        .options-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .option-btn {
-            background-color: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 16px;
-            border-radius: 6px;
-            text-align: left;
-            font-size: 1rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-        }
-        .option-btn:hover:not(:disabled) {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-color: var(--text-muted);
-        }
-        .option-btn:disabled { cursor: default; opacity: 0.7; }
         
-        .option-btn.correct { background-color: rgba(34, 197, 94, 0.15); border-color: var(--correct-color); }
-        .option-btn.wrong { background-color: rgba(239, 68, 68, 0.15); border-color: var(--wrong-color); }
-        .option-btn.was-correct { background-color: rgba(234, 179, 8, 0.15); border-color: var(--warning-color); }
-
-        .feedback-box {
-            margin-top: 25px;
-            padding: 20px;
-            border-radius: 6px;
-            display: none;
-            animation: fadeIn 0.3s;
-        }
-        .feedback-box.show { display: block; }
-        .feedback-box.success { background-color: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); }
-        .feedback-box.error { background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
-        .feedback-title { font-weight: bold; margin-bottom: 8px; }
-        
-        .btn-next {
-            display: none;
+        .scanline::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            margin-top: 20px;
-            background-color: var(--text-main);
-            color: var(--bg-color);
-            padding: 15px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 6px;
-        }
-        .btn-next.show { display: block; }
-
-        /* Overlay de Susto (Jumpscare) */
-        .scare-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(139, 0, 0, 0.95);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            opacity: 0;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 212, 255, 0.07) 50%
+            );
+            background-size: 100% 4px;
             pointer-events: none;
-            transition: opacity 0.1s;
+            animation: scan 4s linear infinite;
         }
-        .scare-overlay.show { opacity: 1; pointer-events: all; }
-        .scare-icon {
-            font-size: 6rem;
-            margin-bottom: 20px;
-            animation: shake 0.2s infinite;
-        }
-        .scare-title {
-            font-size: 3rem;
-            color: white;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
-        .scare-subtitle { font-size: 1.5rem; color: #ffcccc; }
 
-        /* Pantalla 3: Derrota */
-        .defeat-screen { text-align: center; padding: 40px 20px; }
-        .animation-container { height: 180px; position: relative; overflow: hidden; margin-bottom: 30px; }
-        .tomb {
-            font-size: 5rem;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%) translateY(-200%);
-            opacity: 0;
+        @keyframes scan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 200px; }
         }
-        .tomb.animate { animation: tombDrop 1.2s forwards cubic-bezier(0.25, 1, 0.5, 1); }
-        .worm {
-            font-size: 3rem;
-            position: absolute;
-            bottom: -10px;
-            left: 60%;
-            opacity: 0;
+
+        .glitch {
+            animation: glitch 0.4s linear infinite;
         }
-        .worm.animate { animation: wormEmerge 1s forwards ease-out 1.8s; }
-        .rip-title { font-size: 3rem; color: var(--wrong-color); margin-bottom: 10px; opacity: 0; }
-        .rip-title.animate { animation: fadeIn 1s forwards 1s; }
+
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px,0) skew(0deg); }
+            4%, 60% { transform: translate(-2px,0) skew(0deg); }
+            62% { transform: translate(0,0) skew(5deg); }
+        }
+
+        .panel {
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
         
-        /* Pantalla 4: Victoria */
-        .victory-screen { text-align: center; padding: 30px 20px; }
-        .emoji-row { font-size: 2rem; margin-bottom: 20px; letter-spacing: 15px; }
-        .trophy { font-size: 5rem; margin-bottom: 20px; display: inline-block; }
-        .trophy.animate { animation: bounce 2s infinite; }
-        .victory-title { font-size: 2.5rem; color: var(--correct-color); margin-bottom: 15px; }
-
-        /* Componentes compartidos finales */
-        .final-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 30px 0;
+        .panel:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 25px -5px rgb(255 107 0);
         }
 
-        /* Animaciones */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes blink { 0%, 100% { color: var(--text-main); } 50% { color: var(--wrong-color); } }
+        .door-open {
+            animation: doorOpen 0.6s forwards;
+        }
+
+        @keyframes doorOpen {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .life-icon {
+            transition: all 0.4s ease;
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-15px) rotate(-5deg); }
-            40% { transform: translateX(15px) rotate(5deg); }
-            60% { transform: translateX(-15px) rotate(-5deg); }
-            80% { transform: translateX(15px) rotate(5deg); }
-        }
-        @keyframes tombDrop {
-            0% { transform: translateX(-50%) translateY(-200%); opacity: 0; }
-            60% { transform: translateX(-50%) translateY(10%); opacity: 1; }
-            80% { transform: translateX(-50%) translateY(-5%); opacity: 1; }
-            100% { transform: translateX(-50%) translateY(0); opacity: 1; }
-        }
-        @keyframes wormEmerge {
-            0% { transform: translateY(100%); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
-        /* Responsive */
-        @media (max-width: 600px) {
-            .metrics-grid, .final-stats { grid-template-columns: 1fr; gap: 8px; }
-            .start-card, .question-card { padding: 20px; }
-            .scare-title { font-size: 2rem; }
-            .scare-subtitle { font-size: 1.1rem; }
+        .red-pulse {
+            animation: redPulse 1.2s infinite;
+        }
+
+        @keyframes redPulse {
+            0%, 100% { background-color: #7f1d1d; }
+            50% { background-color: #b91c1c; }
         }
     </style>
 </head>
-<body>
+<body class="bg-[#080E1A] text-white overflow-hidden">
+    <!-- START SCREEN -->
+    <div id="start-screen" class="min-h-screen flex items-center justify-center scanline">
+        <div class="max-w-2xl mx-auto text-center px-6">
+            <div class="mb-8 inline-flex items-center gap-3 bg-red-900/50 border border-red-500 px-6 py-2 rounded-full">
+                <span class="text-red-400 text-xl">⚠️</span>
+                <span class="text-red-400 font-bold tracking-widest">EMERGENCIA CORPORATIVA ACTIVA</span>
+            </div>
+            
+            <h1 class="text-6xl md:text-7xl font-bold mb-4 tracking-tighter" style="font-family: 'Press Start 2P', system-ui;">
+                NOVATECH
+            </h1>
+            <div class="text-[#00D4FF] text-4xl mb-8 terminal-font">SALA DE CRISIS</div>
+            
+            <div class="bg-[#111827] border border-[#FF6B00]/30 p-8 rounded-xl mb-10 text-left max-w-md mx-auto">
+                <p class="text-[#00D4FF] mb-6 text-sm leading-relaxed">
+                    Estás atrapado como nuevo CEO.<br>
+                    12 meses antes de la insolvencia.<br><br>
+                    15 decisiones críticas.<br>
+                    3 accesos de seguridad.
+                </p>
+                <div class="grid grid-cols-3 gap-4 text-xs">
+                    <div class="text-center">
+                        <div class="text-2xl">🔐</div>
+                        <div class="text-[#FF6B00]">SALAS</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl">⏰</div>
+                        <div class="text-[#FF6B00]">TIEMPO</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl">💀</div>
+                        <div class="text-[#FF6B00]">VIDAS</div>
+                    </div>
+                </div>
+            </div>
 
-    <div id="scare-overlay" class="scare-overlay">
-        <div id="scare-icon" class="scare-icon">💀</div>
-        <div id="scare-title" class="scare-title">¡VIDA PERDIDA!</div>
-        <div id="scare-subtitle" class="scare-subtitle">NovaTech sangra. Dos chances más.</div>
+            <button onclick="startGame()" 
+                    class="group relative px-16 py-6 bg-[#FF6B00] hover:bg-orange-600 text-black font-bold text-2xl rounded-xl transition-all active:scale-95 flex items-center gap-4 mx-auto">
+                <span class="text-3xl">🚪</span>
+                ENTRAR A LA SALA
+                <span class="text-3xl group-active:rotate-45 transition">→</span>
+            </button>
+            
+            <div class="mt-12 text-xs text-gray-500 flex justify-center gap-8">
+                <div>15 PREGUNTAS</div>
+                <div>3 VIDAS</div>
+                <div>EXPONENCIAL</div>
+            </div>
+        </div>
     </div>
 
-    <div class="container">
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="hidden min-h-screen flex flex-col">
+        <!-- HEADER -->
+        <div class="bg-black/80 border-b border-[#FF6B00]/30 py-3 px-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div onclick="exitToStart()" class="cursor-pointer text-2xl hover:text-red-400">←</div>
+                <div>
+                    <span class="text-[#00D4FF] text-sm">PROGRESO DE ESCAPE</span>
+                    <div class="flex items-center gap-2">
+                        <div id="progress-bar" class="h-2.5 w-64 bg-gray-800 rounded">
+                            <div id="progress-fill" class="h-2.5 bg-[#00D4FF] rounded transition-all" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text" class="text-xs font-mono text-white/70">1/15</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-8">
+                <!-- LIVES -->
+                <div class="flex gap-3" id="lives-container">
+                    <!-- Filled by JS -->
+                </div>
+                
+                <!-- SCORE -->
+                <div class="text-center">
+                    <div class="text-[10px] text-gray-400 tracking-widest">PUNTOS</div>
+                    <div id="score" class="text-3xl font-mono text-[#FF6B00]">0000</div>
+                </div>
+                
+                <!-- STREAK -->
+                <div class="text-center">
+                    <div class="text-[10px] text-gray-400 tracking-widest">RACHA</div>
+                    <div id="streak" class="text-3xl font-mono text-[#00D4FF]">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 p-6 max-w-3xl mx-auto w-full flex flex-col">
+            <!-- ROOM INFO -->
+            <div class="flex justify-between items-center mb-6">
+                <div id="room-badge" 
+                     class="px-6 py-2 bg-[#111827] border border-[#FF6B00]/50 text-[#FF6B00] text-sm font-bold rounded-full">
+                </div>
+                <div id="timer" 
+                     class="font-mono text-4xl tabular-nums tracking-widest flex items-center gap-2">
+                    <span class="text-red-400">⏱</span>
+                    <span id="time-left">25</span>
+                </div>
+            </div>
+
+            <!-- SITUATION -->
+            <div class="bg-[#111827] border border-gray-700 p-6 rounded-xl mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="text-2xl">📋</span>
+                    <span class="uppercase text-xs tracking-widest text-gray-400">SITUACIÓN ACTIVA</span>
+                </div>
+                <p id="situation-text" class="text-gray-300 leading-relaxed"></p>
+            </div>
+
+            <!-- QUESTION -->
+            <div class="mb-8">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="text-2xl">❓</span>
+                    <span class="uppercase text-xs tracking-widest text-gray-400">DECISIÓN CRÍTICA</span>
+                </div>
+                <h2 id="question-text" class="text-xl leading-tight"></h2>
+            </div>
+
+            <!-- OPTIONS -->
+            <div id="options-container" class="grid grid-cols-1 gap-4 mb-8 flex-1">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- FEEDBACK -->
+            <div id="feedback-area" class="hidden mt-auto bg-black/70 border border-[#FF6B00]/40 p-6 rounded-xl">
+                <div id="feedback-icon" class="text-4xl mb-3"></div>
+                <div id="feedback-text" class="text-lg"></div>
+            </div>
+
+            <!-- CONTINUE BUTTON -->
+            <button onclick="nextQuestion()" 
+                    id="continue-btn"
+                    class="hidden w-full py-6 bg-[#00D4FF] hover:bg-cyan-400 text-black font-bold text-xl rounded-2xl mt-6 transition-all">
+                ➡️ ABRIR SIGUIENTE SALA
+            </button>
+        </div>
+    </div>
+
+    <!-- LIFE LOST OVERLAY -->
+    <div id="life-lost-overlay" class="hidden fixed inset-0 bg-red-950/90 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div id="overlay-icon" class="text-9xl mb-8"></div>
+            <h2 id="overlay-title" class="text-5xl font-bold mb-4"></h2>
+            <p id="overlay-subtitle" class="text-xl text-red-300"></p>
+        </div>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div id="game-over-screen" class="hidden min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center">
+        <div class="text-8xl mb-6 animate-bounce">🪦</div>
+        <div id="game-over-worm" class="text-6xl mb-8 hidden">🪱</div>
         
-        <div id="screen-start" class="screen active">
-            <div class="start-card">
-                <div class="badge-alert">Alerta de mercado</div>
-                <h1>NovaTech está en crisis</h1>
-                <p>Sos el nuevo CEO de NovaTech, una empresa familiar con 20 años de historia. Un competidor exponencial acaba de arrebatarles el 30% de la cuota de mercado. Según proyecciones financieras, tenés exactamente 12 meses antes de declarar la insolvencia.</p>
-                <p>Para sobrevivir, el directorio necesita pruebas de que entendés cómo funciona el mundo exponencial. Cada decisión correcta suma credibilidad. Cada error (o demora) destruye valor.</p>
-                <p class="text-orange" style="font-size: 0.9rem;"><em>Atención: El mercado se acelera. El tiempo para tomar decisiones se reduce a medida que avanza la crisis.</em></p>
-                
-                <div class="start-details">
-                    <div class="detail-item">Decisiones clave <strong>15 Preguntas</strong></div>
-                    <div class="detail-item">Tiempo por nivel <strong>25s → 12s</strong></div>
-                    <div class="detail-item">Margen de error <strong>3 Vidas</strong></div>
-                </div>
-                
-                <button class="btn-primary" onclick="startGame()">Asumir el cargo &rarr;</button>
+        <h1 class="text-6xl font-bold text-red-500 mb-4">NOVATECH R.I.P.</h1>
+        <p id="death-reason" class="text-xl text-gray-400 max-w-md mb-10"></p>
+        
+        <div class="bg-[#111827] p-8 rounded-2xl mb-12 w-full max-w-xs">
+            <div class="flex justify-between text-sm mb-4">
+                <span class="text-gray-400">PUNTOS FINALES</span>
+                <span id="final-score-lose" class="font-mono text-2xl"></span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-400">SALAS COMPLETADAS</span>
+                <span id="final-rooms-lose" class="font-mono text-2xl"></span>
             </div>
         </div>
+        
+        <button onclick="restartGame()" 
+                class="px-14 py-6 bg-white text-black font-bold text-2xl rounded-2xl hover:bg-gray-200">
+            🔄 REINTENTAR EL ESCAPE
+        </button>
+    </div>
 
-        <div id="screen-game" class="screen">
-            <div class="top-bar">
-                <div class="progress-container">
-                    <div id="progress-bar" class="progress-bar"></div>
-                </div>
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-label">Pregunta</div>
-                        <div id="metric-q" class="metric-value">1/15</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Puntos</div>
-                        <div id="metric-score" class="metric-value">0</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Racha</div>
-                        <div id="metric-streak" class="metric-value">0</div>
-                    </div>
-                </div>
-                <div class="lives-container">
-                    <div class="lives-status" id="lives-text">Empresa saludable</div>
-                    <div class="lives-circles">
-                        <div class="life-circle" id="life-1"></div>
-                        <div class="life-circle" id="life-2"></div>
-                        <div class="life-circle" id="life-3"></div>
-                    </div>
-                </div>
+    <!-- WIN SCREEN -->
+    <div id="win-screen" class="hidden min-h-screen bg-gradient-to-b from-[#080E1A] to-black flex flex-col items-center justify-center p-6 text-center">
+        <div class="flex gap-6 text-6xl mb-8" id="win-emojis">
+            🎉 🔓 🚀 🔓 🎉
+        </div>
+        
+        <div id="win-trophy" class="text-8xl mb-6"></div>
+        
+        <h1 id="win-title" class="text-5xl font-bold mb-6 leading-tight"></h1>
+        
+        <p id="win-message" class="max-w-md text-gray-300 mb-12 text-lg"></p>
+        
+        <div class="grid grid-cols-3 gap-6 w-full max-w-md mb-12">
+            <div class="bg-[#111827] p-6 rounded-2xl">
+                <div class="text-3xl font-mono text-[#FF6B00]" id="final-score-win"></div>
+                <div class="text-xs text-gray-400">PUNTOS</div>
             </div>
-
-            <div class="question-card">
-                <div class="question-header">
-                    <div id="q-number" class="question-number">Pregunta 1 de 15</div>
-                    <div id="q-badge" class="level-badge">nivel 1 · fundamentos</div>
-                </div>
-                
-                <div class="timer-container">
-                    <div class="timer-bar-bg">
-                        <div id="timer-bar" class="timer-bar"></div>
-                    </div>
-                    <div id="timer-text" class="timer-text">25s</div>
-                </div>
-
-                <div id="q-narrative" class="narrative">Narrativa de contexto...</div>
-                <div id="q-text" class="question-text">Texto de la pregunta...</div>
-                
-                <div class="options-grid" id="options-container">
-                    </div>
-
-                <div id="feedback-box" class="feedback-box">
-                    <div id="feedback-title" class="feedback-title"></div>
-                    <div id="feedback-text"></div>
-                </div>
-
-                <button id="btn-next" class="btn-next" onclick="nextAction()">Siguiente decisión &rarr;</button>
+            <div class="bg-[#111827] p-6 rounded-2xl">
+                <div class="text-3xl font-mono text-[#00D4FF]" id="final-rooms-win"></div>
+                <div class="text-xs text-gray-400">SALAS</div>
+            </div>
+            <div class="bg-[#111827] p-6 rounded-2xl">
+                <div class="text-3xl font-mono text-yellow-400" id="max-streak-win"></div>
+                <div class="text-xs text-gray-400">RACHA</div>
             </div>
         </div>
-
-        <div id="screen-defeat" class="screen defeat-screen">
-            <div class="animation-container">
-                <div id="tomb" class="tomb">🪦</div>
-                <div id="worm" class="worm">🪱</div>
-            </div>
-            <h1 id="rip-title" class="rip-title">NovaTech R.I.P.</h1>
-            <p id="defeat-subtitle" class="text-muted" style="font-size: 1.2rem;"></p>
-            
-            <div class="final-stats" style="margin-top: 40px;">
-                <div class="metric-card">
-                    <div class="metric-label">Puntos Finales</div>
-                    <div id="defeat-score" class="metric-value">0</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Decisiones Correctas</div>
-                    <div id="defeat-correct" class="metric-value">0/15</div>
-                </div>
-            </div>
-            
-            <button class="btn-primary" style="margin-top: 20px; max-width: 300px;" onclick="initGame()">Intentar de nuevo</button>
-        </div>
-
-        <div id="screen-victory" class="screen victory-screen">
-            <div class="emoji-row">🎉✨🚀✨🎉</div>
-            <div id="victory-trophy" class="trophy">🏆</div>
-            <h1 id="victory-title" class="victory-title">NovaTech es una ExO</h1>
-            <p id="victory-msg" style="font-size: 1.1rem; color: var(--text-muted);"></p>
-            <p id="victory-desc" style="margin-top: 20px; padding: 20px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color);"></p>
-
-            <div class="final-stats">
-                <div class="metric-card">
-                    <div class="metric-label">Puntos Finales</div>
-                    <div id="victory-score" class="metric-value">0</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Aciertos</div>
-                    <div id="victory-correct" class="metric-value">0/15</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Racha Máxima</div>
-                    <div id="victory-streak" class="metric-value">0</div>
-                </div>
-            </div>
-
-            <button class="btn-primary" style="margin-top: 20px; max-width: 300px;" onclick="initGame()">Jugar de nuevo</button>
-        </div>
-
+        
+        <button onclick="restartGame()" 
+                class="px-16 py-6 bg-[#FF6B00] text-black font-bold text-2xl rounded-2xl hover:bg-orange-600">
+            🔄 VOLVER A JUGAR
+        </button>
     </div>
 
     <script>
-        /* ==================================================
-           BASE DE DATOS DE PREGUNTAS
-           ================================================== */
-        const questionsData = [
+        // Questions Data
+        const questions = [
             {
-                level: 1, time: 25, badge: "nivel 1 · fundamentos",
-                narrative: "El directorio te pide que expliques por qué NovaTech perdió clientes tan rápido sin que nadie lo viera venir.",
-                text: "¿Cómo se llama la fase de las Seis D's donde la tecnología disruptiva parece lenta e inofensiva y las empresas incumbentes se confían?",
+                id: 1,
+                level: 1,
+                time: 25,
+                badge: "🔐 SALA 1 — Nivel Básico",
+                situation: "El directorio no entiende por qué NovaTech perdió clientes tan rápido sin señales de alarma previas.",
+                question: "¿Cómo se llama la fase de las Seis D's donde la tecnología nueva parece inofensiva y las empresas se confían?",
                 options: [
-                    "Digitalización",
-                    "Decepción",
-                    "Disrupción",
-                    "Desmaterialización"
+                    { text: "La fase en que el sector recién comienza a digitalizarse y los cambios son mínimos", correct: false },
+                    { text: "La fase en que la amenaza parece lenta e inferior, y los incumbentes se relajan", correct: true },
+                    { text: "La fase en que el competidor ya superó al incumbente en cuota de mercado", correct: false },
+                    { text: "La fase en que los productos físicos dejan de necesitarse como objetos separados", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Exacto. La Decepción es la trampa más peligrosa: la nueva tecnología parece inferior y no amenazante. Es el momento donde NovaTech debió reaccionar, no cuando los clientes ya se fueron.",
-                feedbackWrong: "Era la Decepción. Es la fase más peligrosa porque todo parece tranquilo. NovaTech vivió tres años mirando al competidor sin tomarlo en serio."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. La Decepción es la trampa más peligrosa: todo parece tranquilo mientras la amenaza se vuelve irreversible.",
+                feedbackIncorrect: "❌ Error. Era la Decepción. NovaTech vivió tres años en esa fase mirando al competidor sin tomarlo en serio."
             },
             {
-                level: 1, time: 25, badge: "nivel 1 · fundamentos",
-                narrative: "Un asesor propone mejorar la eficiencia de NovaTech en un 10% para recuperar clientes perdidos.",
-                text: "Desde la lógica exponencial, ¿cuál es el problema de fondo con esa propuesta?",
+                id: 2,
+                level: 1,
+                time: 25,
+                badge: "🔐 SALA 2 — Nivel Básico",
+                situation: "Un asesor propone mejorar la eficiencia de NovaTech en un 10% para recuperar los clientes perdidos.",
+                question: "¿Cuál es el problema de fondo con esa propuesta desde la lógica exponencial?",
                 options: [
-                    "Es demasiado costosa de implementar",
-                    "Mejorar un 10% usa la misma lógica lineal que ya fracasó — necesitás ser 10 veces mejor, no un poco mejor",
-                    "El 10% es poco, debería ser 20%",
-                    "Es un buen punto de partida antes de pensar más grande"
+                    { text: "Es una mejora insuficiente porque debería apuntar al menos a un 25% de ganancia", correct: false },
+                    { text: "Requiere una inversión inicial demasiado alta para una empresa con márgenes en caída", correct: false },
+                    { text: "Usa la misma lógica lineal que ya fracasó — competir con ExOs exige 10x, no 10%", correct: true },
+                    { text: "Es correcta como primer paso antes de encarar una transformación más profunda", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Correcto. Mejorar un 10% es pensamiento lineal aplicado a un problema exponencial. Las ExOs no mejoran el modelo existente: lo cambian radicalmente. Un 10% más eficiente no derrota a un competidor que opera sin activos fijos.",
-                feedbackWrong: "La clave es la lógica lineal. Para competir con una ExO necesitás repensar el modelo desde cero, no optimizar el existente."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. Mejorar un 10% en un contexto exponencial es como intentar ganarle a Usain Bolt aumentando el ritmo de caminata.",
+                feedbackIncorrect: "❌ Error. El problema es la lógica lineal. Optimizar el modelo existente no derrota a un competidor que opera con un modelo radicalmente diferente."
             },
             {
-                level: 1, time: 25, badge: "nivel 1 · fundamentos",
-                narrative: "El directorio te pregunta qué diferencia a una Organización Exponencial de una empresa simplemente buena.",
-                text: "¿Cuál es la característica central que define a una ExO según Ismail?",
+                id: 3,
+                level: 1,
+                time: 25,
+                badge: "🔐 SALA 3 — Nivel Básico",
+                situation: "El directorio pregunta qué hace diferente a las organizaciones que crecen diez veces más rápido.",
+                question: "¿Cuál es la característica central que define a una ExO según Ismail?",
                 options: [
-                    "Tiene más empleados capacitados que sus competidores",
-                    "Su impacto es al menos 10 veces superior al de sus pares, usando recursos externos en lugar de propios",
-                    "Invierte más en tecnología que la industria",
-                    "Tiene presencia internacional desde el inicio"
+                    { text: "Tiene el doble de empleados capacitados que sus competidores directos del mismo sector", correct: false },
+                    { text: "Invierte el triple en tecnología y digitalización que el promedio de su industria", correct: false },
+                    { text: "Impacto al menos 10 veces superior al de sus pares usando recursos externos, no propios", correct: true },
+                    { text: "Tiene presencia en al menos tres mercados internacionales desde su año de fundación", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Exacto. Impacto desproporcionadamente grande —al menos 10x— con una fracción de los recursos, gracias al aprovechamiento de activos externos. No es solo crecer rápido: es crecer sin acumular estructura.",
-                feedbackWrong: "La definición del libro: 10x de impacto usando recursos externos. No es sobre empleados ni tecnología: es sobre la lógica de cómo escalan."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. 10x de impacto con recursos externos: esa es la definición exacta que separa a una ExO de cualquier empresa eficiente.",
+                feedbackIncorrect: "❌ Error. La definición del libro: impacto 10x usando recursos externos en lugar de propios. No es sobre personal ni inversión tecnológica."
             },
             {
-                level: 2, time: 22, badge: "nivel 2 · conceptos clave",
-                narrative: "Tu competidor no tiene ningún activo físico propio pero domina el mercado. El directorio no lo entiende.",
-                text: "Uber no tiene autos, Airbnb no tiene habitaciones. ¿Qué atributo de SCALE describe esta lógica?",
+                id: 4,
+                level: 2,
+                time: 23,
+                badge: "🔐 SALA 4 — Nivel Intermedio",
+                situation: "El competidor de NovaTech no tiene activos físicos pero domina el mercado. El CFO no entiende cómo es posible.",
+                question: "Uber no tiene autos, Airbnb no tiene habitaciones. ¿Qué atributo de SCALE describe esa lógica?",
                 options: [
-                    "Staff on Demand",
-                    "Community & Crowd",
-                    "Algorithms",
-                    "Leveraged Assets"
+                    { text: "Staff on Demand: acceso a talento externo por proyecto sin generar nómina fija permanente", correct: false },
+                    { text: "Community & Crowd: comunidad externa que contribuye atraída por el propósito organizacional", correct: false },
+                    { text: "Algorithms: datos históricos procesados como inteligencia predictiva de alta precisión", correct: false },
+                    { text: "Leveraged Assets: usar activos externos bajo demanda en lugar de poseer infraestructura", correct: true }
                 ],
-                correctIndex: 3,
-                feedbackCorrect: "Leveraged Assets. En lugar de poseer, acceden. La propiedad genera costos fijos y rigidez; el acceso genera flexibilidad y escala sin límites. Es exactamente lo que hace que tu competidor tenga tarifas 40% menores que NovaTech.",
-                feedbackWrong: "Era Leveraged Assets. Tu competidor no posee los recursos que usa: los accede bajo demanda. Eso elimina los costos fijos que NovaTech arrastra."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. Leveraged Assets es la idea más radical: en un mundo exponencial, poseer activos es una carga, no una ventaja.",
+                feedbackIncorrect: "❌ Error. Era Leveraged Assets. Tu competidor no posee lo que usa: lo accede bajo demanda, eliminando todos los costos fijos que NovaTech arrastra."
             },
             {
-                level: 2, time: 22, badge: "nivel 2 · conceptos clave",
-                narrative: "Tu jefe de finanzas propone un nuevo plan estratégico a 5 años para guiar la transformación.",
-                text: "¿Por qué las ExOs abandonaron el plan quinquenal y qué usan en su lugar?",
+                id: 5,
+                level: 2,
+                time: 23,
+                badge: "🔐 SALA 5 — Nivel Intermedio",
+                situation: "El CFO insiste en elaborar un plan estratégico a cinco años para guiar la transformación.",
+                question: "¿Por qué las ExOs reemplazaron el plan quinquenal y qué sistema usan en su lugar?",
                 options: [
-                    "Porque es mucho trabajo. Usan hojas de cálculo más simples",
-                    "Porque en un entorno exponencial el mundo cambia más rápido que cualquier plan. Usan OKR en tiempo real + PTM como guía general",
-                    "Porque los inversores no los leen. Usan pitches de una página",
-                    "Porque prefieren no planificar y adaptarse sobre la marcha"
+                    { text: "Porque el plan quinquenal es costoso de elaborar y los accionistas prefieren reportes trimestrales", correct: false },
+                    { text: "Porque en entornos exponenciales cambian más rápido que cualquier plan: usan OKR en tiempo real", correct: true },
+                    { text: "Porque los inversores de riesgo exigen documentos más ágiles para aprobar rondas de financiamiento", correct: false },
+                    { text: "Porque prefieren no planificar a largo plazo y adaptarse intuitivamente a los cambios del mercado", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Correcto. El plan quinquenal asume estabilidad que no existe. Las ExOs usan OKR medidos en tiempo real, guiados por un PTM que da dirección sin rigidez. La ejecución supera a la planificación.",
-                feedbackWrong: "El plan quinquenal asume un mundo estable. La solución ExO son OKR en tiempo real + PTM. En el mundo exponencial, el propósito triunfa sobre la estrategia."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. El plan quinquenal asume estabilidad. Los OKR asumen cambio permanente: miden en tiempo real y se ajustan sin esperar diciembre.",
+                feedbackIncorrect: "❌ Error. El problema del plan quinquenal es que asume un mundo estable. La solución ExO son OKR en tiempo real guiados por el PTM."
             },
             {
-                level: 2, time: 22, badge: "nivel 2 · conceptos clave",
-                narrative: "NovaTech tiene 25 años de datos operativos en planillas internas que nadie procesa. Un consultor los llama 'activo dormido'.",
-                text: "¿Qué atributo de SCALE describe el proceso de convertir esos datos en inteligencia predictiva que nadie puede replicar?",
+                id: 6,
+                level: 2,
+                time: 23,
+                badge: "🔐 SALA 6 — Nivel Intermedio",
+                situation: "NovaTech tiene 25 años de datos operativos en planillas internas que nadie procesa ni utiliza.",
+                question: "¿Qué atributo de SCALE describe convertir esos datos en inteligencia que nadie puede replicar?",
                 options: [
-                    "Engagement",
-                    "Algorithms",
-                    "Interfaces",
-                    "Social Technologies"
+                    { text: "Engagement: sistemas de reputación que mantienen activa y comprometida la red de operadores externos", correct: false },
+                    { text: "Algorithms: datos procesados como motor predictivo que se vuelve ventaja competitiva duradera", correct: true },
+                    { text: "Leveraged Assets: infraestructura ociosa abierta al mercado para generar ingresos bajo demanda", correct: false },
+                    { text: "Community & Crowd: red de colaboradores externos comprometidos con el propósito transformador", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Algorithms. Los datos brutos no son el activo: el activo es el modelo entrenado con esos datos. 25 años de historial real es una ventaja que ningún competidor nuevo puede comprar ni construir rápidamente.",
-                feedbackWrong: "Era Algorithms. Los datos en planillas no valen solos. Procesados con algoritmos se convierten en inteligencia predictiva que ningún competidor nuevo puede replicar porque requiere años de datos reales para entrenarse."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. Los datos brutos no son el activo: el modelo entrenado con esos datos es lo que nadie puede comprar ni copiar en poco tiempo.",
+                feedbackIncorrect: "❌ Error. Era Algorithms. Datos en planillas no valen nada solos. Procesados se vuelven ventaja que ningún competidor nuevo puede replicar rápidamente."
             },
             {
-                level: 3, time: 18, badge: "nivel 3 · aplicación",
-                narrative: "El equipo de innovación propone un PTM: 'Ser el líder en soluciones de calidad para nuestros clientes'.",
-                text: "¿Por qué eso NO es un PTM según la lógica de Organizaciones Exponenciales?",
+                id: 7,
+                level: 3,
+                time: 21,
+                badge: "🔐 SALA 7 — Nivel Avanzado",
+                situation: "El equipo de innovación propone este PTM para NovaTech: 'Ser el líder en soluciones de calidad para nuestros clientes.'",
+                question: "¿Por qué esa frase NO es un PTM según la lógica de Organizaciones Exponenciales?",
                 options: [
-                    "Porque es demasiado corto",
-                    "Porque describe lo que hace la empresa, no el problema del mundo que resuelve. Un PTM genuino responde: ¿para qué existe esta organización más allá del negocio?",
-                    "Porque no menciona tecnología",
-                    "Porque debería estar en inglés para ser más profesional"
+                    { text: "Porque es demasiado corta y genérica para funcionar como hoja de ruta en presentaciones externas", correct: false },
+                    { text: "Porque no menciona tecnología ni innovación, dos elementos que todo PTM moderno debe incluir", correct: false },
+                    { text: "Porque describe un objetivo de negocio y no el problema del mundo que la organización resuelve", correct: true },
+                    { text: "Porque el libro exige que el PTM esté formulado en inglés para tener alcance y credibilidad global", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Exacto. 'Ser el líder' es descripción del negocio, no propósito transformador. Prueba: ¿tomaría NovaTech una decisión que perjudica su rentabilidad para ser fiel a ese propósito? Si la respuesta es no, no es PTM.",
-                feedbackWrong: "Un PTM responde al impacto en el mundo, no a los objetivos de la empresa. 'Ser el líder' podría decirlo cualquier empresa. Un PTM genuino es tan específico que nadie más puede decir lo mismo."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. 'Ser el líder' es misión corporativa. Un PTM responde: ¿qué problema del mundo resolvemos que nadie más puede resolver igual?",
+                feedbackIncorrect: "❌ Error. Un PTM responde al impacto en el mundo, no al objetivo de la empresa. 'Ser el líder' lo podría decir cualquier empresa del sector."
             },
             {
-                level: 3, time: 18, badge: "nivel 3 · aplicación",
-                narrative: "NovaTech quiere lanzar un piloto de transformación. El CFO insiste en esperar a tener todos los datos antes de empezar.",
-                text: "¿Qué atributo de IDEAS explica por qué ese enfoque es el opuesto de la lógica ExO?",
+                id: 8,
+                level: 3,
+                time: 21,
+                badge: "🔐 SALA 8 — Nivel Avanzado",
+                situation: "NovaTech quiere lanzar un piloto. El CFO dice que hay que esperar a tener todos los datos antes de comenzar.",
+                question: "¿Qué atributo de IDEAS explica por qué esa postura contradice directamente la lógica ExO?",
                 options: [
-                    "Autonomy",
-                    "Dashboards",
-                    "Experimentation",
-                    "Social Technologies"
+                    { text: "Autonomy: los equipos necesitan autoridad propia para decidir sin escalar cada cosa a la jerarquía", correct: false },
+                    { text: "Social Technologies: la comunicación horizontal acelera decisiones sin esperar aprobaciones verticales", correct: false },
+                    { text: "Experimentation: testear la hipótesis rápido y barato sin esperar certeza antes de comprometer recursos", correct: true },
+                    { text: "Dashboards: las métricas en tiempo real reemplazan la necesidad de estudios previos exhaustivos", correct: false }
                 ],
-                correctIndex: 2,
-                feedbackCorrect: "Experimentation. La lógica ExO es testear la hipótesis central con el mínimo de inversión posible y aprender de los resultados. Esperar certeza antes de experimentar es la lógica lineal que trajo a esta crisis.",
-                feedbackWrong: "Era Experimentation. Las ExOs no esperan certeza: testean hipótesis rápido y barato. Falla rápido y barato mientras eliminás lo que no sirve. El CFO quiere certeza donde lo único válido es aprender."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. Experimentation: falla rápido y barato mientras eliminás lo que no sirve. Esperar certeza en un entorno exponencial es paralizarse.",
+                feedbackIncorrect: "❌ Error. Era Experimentation. Las ExOs no esperan certeza: testean la hipótesis mínima lo antes posible con el menor recurso posible."
             },
             {
-                level: 3, time: 18, badge: "nivel 3 · aplicación",
-                narrative: "Un gerente propone un 'comité de innovación' con representantes de todas las áreas para gestionar la transformación.",
-                text: "¿Por qué esa respuesta al sistema inmunológico corporativo probablemente va a fracasar?",
+                id: 9,
+                level: 3,
+                time: 21,
+                badge: "🔐 SALA 9 — Nivel Avanzado",
+                situation: "Un gerente propone un comité de innovación con representantes de todas las áreas para gestionar la transformación.",
+                question: "¿Por qué esa solución al sistema inmunológico corporativo probablemente va a fracasar?",
                 options: [
-                    "Porque los comités son lentos",
-                    "Porque un comité integrado por la estructura existente va a defender el status quo. El sistema inmunológico no se vence desde adentro: se rodea con separación real",
-                    "Porque faltan personas de IT",
-                    "Porque debería llamarse 'task force', no comité"
+                    { text: "Porque los comités tienen decisiones más lentas y eso aumenta el tiempo hasta ver resultados", correct: false },
+                    { text: "Porque un comité integrado por la estructura existente defenderá el status quo que pretende cambiar", correct: true },
+                    { text: "Porque los representantes de cada área no tienen la formación técnica necesaria para innovar", correct: false },
+                    { text: "Porque el comité necesita presupuesto propio y la empresa no tiene margen financiero disponible", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Correcto. Un comité formado por la misma estructura que hay que transformar es el sistema inmunológico con otro nombre. Separación real: presupuesto propio, equipo separado, reporte directo al CEO.",
-                feedbackWrong: "La clave es la separación. Un comité integrado va a priorizar el negocio actual. El sistema inmunológico no se convence: se rodea. Kodak tenía comités de innovación y aun así quebró."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. El sistema inmunológico no se vence desde adentro: se rodea. Separación real, no cosmética, es la única respuesta efectiva.",
+                feedbackIncorrect: "❌ Error. Un comité integrado a la estructura existente es el sistema inmunológico con otro nombre. Kodak tenía comités de innovación y aun así quebró."
             },
             {
-                level: 3, time: 18, badge: "nivel 3 · aplicación",
-                narrative: "NovaTech considera aplicar 'Interfaces' para gestionar la entrada de operadores externos.",
-                text: "¿Cuál es la diferencia real entre Interfaces y simplemente usar un formulario de contacto?",
+                id: 10,
+                level: 3,
+                time: 21,
+                badge: "🔐 SALA 10 — Nivel Avanzado",
+                situation: "NovaTech quiere implementar Interfaces para gestionar el acceso de operadores externos a su infraestructura.",
+                question: "¿Cuál es la diferencia real entre una Interfaz ExO y un formulario de contacto digitalizado?",
                 options: [
-                    "No hay diferencia, es lo mismo con mejor nombre",
-                    "Las Interfaces son procesos algorítmicos que filtran, asignan y automatizan la conexión exterior-interior sin intervención manual. Un formulario es burocracia digitalizada",
-                    "Las Interfaces son más baratas de implementar",
-                    "Las Interfaces requieren inteligencia artificial obligatoriamente"
+                    { text: "Las Interfaces son más baratas de mantener y no requieren personal técnico para su operación diaria", correct: false },
+                    { text: "Las Interfaces son más seguras porque encriptan los datos de cada operador externo de forma automática", correct: false },
+                    { text: "Las Interfaces automatizan asignación, monitoreo y certificación sin intervención manual para escalar", correct: true },
+                    { text: "Las Interfaces son un término de marketing para referirse a un proceso manual digitalizado y ordenado", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Exacto. La Interfaz permite que la escala externa no destruya la organización interna. Sin ella, cada operador externo genera una cadena manual que colapsa todo. La diferencia entre Airbnb y un hotel con reservas por mail es exactamente esta.",
-                feedbackWrong: "Una Interfaz no es un formulario digital: es el sistema que hace escalar sin agregar personal. Airbnb gestiona millones de reservas sin un equipo para cada una. Eso es una Interfaz real."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. Una Interfaz hace que la escala externa no destruya la organización interna: Airbnb gestiona millones de reservas sin equipo para cada una.",
+                feedbackIncorrect: "❌ Error. Una Interfaz no es un formulario digital: es el sistema que permite escalar sin agregar personal. Sin eso, el modelo colapsa."
             },
             {
-                level: 4, time: 15, badge: "nivel 4 · análisis",
-                narrative: "McKinsey predijo menos de 1 millón de celulares para el año 2000. Había 100 millones.",
-                text: "¿Qué principio específico explica por qué analistas brillantes cometen ese error sistemáticamente?",
+                id: 11,
+                level: 4,
+                time: 20,
+                badge: "🔐 SALA 11 — Nivel Experto",
+                situation: "McKinsey predijo menos de 1 millón de celulares para el año 2000. Había 100 millones.",
+                question: "¿Qué principio explica por qué los mejores analistas cometen ese error de manera sistemática?",
                 options: [
-                    "Falta de información de mercado",
-                    "El pensamiento lineal aplicado a fenómenos exponenciales. La curva parece plana en la fase de Decepción y luego se dispara de forma que ningún modelo lineal puede predecir",
-                    "Sesgo político en las proyecciones",
-                    "Interés en proteger a las empresas incumbentes"
+                    { text: "Usan modelos lineales para predecir fenómenos exponenciales, lo que siempre subestima el crecimiento", correct: true },
+                    { text: "Tienen acceso limitado a datos de mercado reales en mercados tecnológicos emergentes y cambiantes", correct: false },
+                    { text: "Están condicionados por presiones políticas de clientes que prefieren proyecciones conservadoras", correct: false },
+                    { text: "Evalúan tecnologías sin tener en cuenta el comportamiento histórico de industrias similares anteriores", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Correcto. El cerebro proyecta linealmente por defecto. En la Decepción, el crecimiento exponencial es indistinguible del lineal. Vinod Khosla documentó que los mejores analistas del mundo repitieron este error cuatro veces consecutivas.",
-                feedbackWrong: "Es el pensamiento lineal. No fallaron por falta de datos: sus modelos mentales son lineales. La LOAR de Kurzweil describe por qué ocurre en cualquier industria que se digitaliza."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. El cerebro proyecta linealmente por defecto. Vinod Khosla documentó que los mejores analistas del mundo repitieron este error cuatro veces seguidas.",
+                feedbackIncorrect: "❌ Error. Es el pensamiento lineal. No fallaron por datos ni presiones: sus modelos mentales son lineales en un fenómeno que crece exponencialmente."
             },
             {
-                level: 4, time: 15, badge: "nivel 4 · análisis",
-                narrative: "El competidor de NovaTech tiene 50.000 usuarios que reportan datos en tiempo real de forma voluntaria.",
-                text: "¿Qué atributo de SCALE describe esto y qué lo hace difícil de replicar para NovaTech?",
+                id: 12,
+                level: 4,
+                time: 20,
+                badge: "🔐 SALA 12 — Nivel Experto",
+                situation: "El competidor de NovaTech tiene 50.000 usuarios que reportan datos en tiempo real de forma voluntaria.",
+                question: "¿Qué atributo de SCALE describe esto y por qué es tan difícil de replicar para NovaTech?",
                 options: [
-                    "Leveraged Assets, porque los usuarios son un activo externo",
-                    "Community & Crowd, porque se construye alrededor de un PTM que convoca personas que contribuyen sin ser empleadas. Sin PTM genuino, no se puede comprar con dinero",
-                    "Engagement, porque los usuarios están comprometidos",
-                    "Algorithms, porque los datos son el verdadero valor"
+                    { text: "Leveraged Assets: los usuarios aportan datos como activos externos sin costo directo para la empresa", correct: false },
+                    { text: "Engagement: los usuarios están comprometidos con el sistema porque reciben beneficios tangibles a cambio", correct: false },
+                    { text: "Community & Crowd: comunidad convocada por el PTM que contribuye sin ser empleada ni contratada", correct: true },
+                    { text: "Algorithms: los datos que aportan los usuarios alimentan un modelo predictivo de alto valor estratégico", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Community & Crowd. La comunidad no se compra: se convoca alrededor de un propósito. Waze logró que millones reportaran datos de tráfico voluntariamente. Sin PTM genuino, NovaTech no puede replicar eso con presupuesto de marketing.",
-                feedbackWrong: "Era Community & Crowd. La razón por la que es difícil de replicar: la comunidad no se compra. Sin PTM genuino que haga que las personas quieran contribuir, el marketing no alcanza."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. Community & Crowd no se compra: se convoca. Sin PTM genuino, NovaTech puede gastar millones y no obtener lo mismo.",
+                feedbackIncorrect: "❌ Error. Era Community & Crowd. La razón por la que es difícil de copiar: la comunidad no se contrata, se convoca alrededor de un propósito que la gente hace suyo."
             },
             {
-                level: 5, time: 12, badge: "nivel 5 · síntesis",
-                narrative: "El directorio está dividido entre tres opciones para NovaTech. Tenés que elegir y justificar en segundos.",
-                text: "NovaTech tiene infraestructura certificada con 60% de capacidad ociosa. ¿Cuál transformación es más coherente con la lógica ExO y más difícil de replicar por un competidor nuevo?",
+                id: 13,
+                level: 5,
+                time: 19,
+                badge: "🔐 SALA 13 — Nivel Síntesis",
+                situation: "NovaTech tiene infraestructura certificada con 60% de capacidad ociosa. El directorio debate qué hacer.",
+                question: "¿Cuál transformación es más coherente con la lógica ExO y más difícil de replicar?",
                 options: [
-                    "Vender la infraestructura y lanzar una app que imite al competidor con mejores precios",
-                    "Abrir la infraestructura como servicio compartido para que otros operadores —incluido el competidor— la usen como plataforma, convirtiéndose en la capa que todos necesitan",
-                    "Reducir precios un 30% para recuperar clientes perdidos",
-                    "Invertir en marketing para comunicar mejor la propuesta de valor existente"
+                    { text: "Vender la infraestructura para financiar una app que imite al competidor con precios similares", correct: false },
+                    { text: "Abrir la infraestructura como servicio compartido para que otros operadores la usen como plataforma", correct: true },
+                    { text: "Reducir las tarifas un 30% para recuperar clientes que se fueron atraídos por el precio del rival", correct: false },
+                    { text: "Invertir en campañas de marketing para comunicar mejor la propuesta de valor que ya existe", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Correcto y sofisticado. No compite con el competidor: lo convierte en cliente. Es la lógica de Amazon Web Services: abrir la infraestructura al mercado, incluso a competidores. Los activos ociosos generan ingreso y el competidor se vuelve dependiente.",
-                feedbackWrong: "La respuesta correcta era abrir la infraestructura. Convertís el mayor costo fijo en fuente de ingreso y al competidor en cliente. Imitar llega tarde. Bajar precios destruye margen. El marketing no cambia el modelo fundamental."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. No compite con el rival: lo convierte en cliente. Es la lógica de AWS: abrir la infraestructura al mercado y ganar con el servicio.",
+                feedbackIncorrect: "❌ Error. La respuesta B. Abrir la infraestructura convierte el mayor costo fijo en fuente de ingresos y al competidor en cliente potencial."
             },
             {
-                level: 5, time: 12, badge: "nivel 5 · síntesis",
-                narrative: "Kodak inventó la cámara digital en 1975. Quebró en 2012. NovaTech corre el mismo riesgo.",
-                text: "¿Cuál es el mecanismo concreto que comparten Kodak y NovaTech, más allá de ser 'empresas tradicionales'?",
+                id: 14,
+                level: 5,
+                time: 19,
+                badge: "🔐 SALA 14 — Nivel Síntesis",
+                situation: "Kodak inventó la cámara digital en 1975. Quebró en 2012. NovaTech podría seguir el mismo camino.",
+                question: "¿Cuál es el mecanismo concreto que comparten Kodak y NovaTech más allá de ser empresas tradicionales?",
                 options: [
-                    "Las dos operan en industrias que se digitalizaron",
-                    "Las dos tienen el activo que podría salvarlas pero su sistema inmunológico lo bloquea porque amenaza el negocio que genera ingresos hoy",
-                    "Las dos tienen estructuras jerárquicas rígidas",
-                    "Las dos subestimaron a sus competidores"
+                    { text: "Las dos operaron en industrias que se digitalizaron sin adaptar su modelo de ingresos a tiempo", correct: false },
+                    { text: "Las dos tienen el activo que podría salvarlas pero el sistema inmunológico lo bloquea por proteger ingresos", correct: true },
+                    { text: "Las dos construyeron estructuras jerárquicas que impiden la toma de decisiones ágil y descentralizada", correct: false },
+                    { text: "Las dos subestimaron a competidores externos que operaban con menos recursos y más velocidad", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Exacto. El sistema inmunológico de Kodak rechazó la cámara digital porque adoptarla destruía los ingresos del negocio de rollos. NovaTech tiene el mismo dilema: la infraestructura que podría salvarla amenaza el negocio que la mantiene viva hoy.",
-                feedbackWrong: "El mecanismo: posesión del activo salvador bloqueada por el sistema inmunológico. No es la jerarquía ni subestimar al competidor: es que el cambio que salvaría a la empresa destruye los ingresos actuales y la organización se protege rechazándolo."
+                feedbackCorrect: "✅ Correcto. La puerta se abre. Ese es el diagnóstico más preciso. El sistema inmunológico no rechazó la innovación por incompetencia: la rechazó para proteger lo que existía.",
+                feedbackIncorrect: "❌ Error. El mecanismo: tener el activo salvador y que el propio sistema lo bloquee porque amenaza los ingresos actuales. No es jerarquía ni subestimación."
             },
             {
-                level: 5, time: 12, badge: "nivel 5 · síntesis",
-                narrative: "NovaTech superó la crisis. El directorio pide la decisión más importante para los próximos años.",
-                text: "Una ExO madura frente a nuevas disrupciones debería principalmente:",
+                id: 15,
+                level: 5,
+                time: 19,
+                badge: "🔐 SALA 15 — Nivel Síntesis",
+                situation: "NovaTech escapó de la crisis. El directorio pide la decisión más importante para el futuro.",
+                question: "Una ExO que quiere mantener su ventaja frente a nuevas disrupciones debería principalmente:",
                 options: [
-                    "Crecer en empleados y activos para consolidar el liderazgo",
-                    "Disrumpirse a sí misma continuamente antes de que otros lo hagan, canibalizando sus propios modelos de negocio cuando sea necesario",
-                    "Crear barreras regulatorias y patentes para proteger su posición",
-                    "Diversificarse en industrias no relacionadas para reducir el riesgo"
+                    { text: "Crecer en empleados y activos propios para consolidar posición y reducir dependencia de terceros", correct: false },
+                    { text: "Disrumpirse a sí misma continuamente antes de que otros lo hagan, canibalizando sus propios modelos", correct: true },
+                    { text: "Construir barreras regulatorias y patentes para proteger su posición en el mercado actual", correct: false },
+                    { text: "Diversificarse en industrias no relacionadas para distribuir el riesgo ante posibles disrupciones", correct: false }
                 ],
-                correctIndex: 1,
-                feedbackCorrect: "Correcto. Es la lección más profunda del libro. Netflix destruyó su negocio de DVD para construir el de streaming. Tesla abrió sus patentes. La única defensa sostenible en un mundo exponencial es disruptirse a uno mismo antes de que otro lo haga.",
-                feedbackWrong: "La respuesta es disrumpirse a sí misma. Crecer en activos recrea el problema original. Las patentes retrasan pero no previenen. La diversificación sin lógica exponencial multiplica los problemas."
+                feedbackCorrect: "✅ ¡ESCAPE COMPLETADO! Netflix destruyó sus DVDs para construir el streaming. La única defensa real en un mundo exponencial es disrumpirse antes de que otro lo haga.",
+                feedbackIncorrect: "❌ Error. La respuesta es disrumpirse a sí misma. Crecer en activos recrea el problema. Las patentes retrasan pero no previenen."
             }
-        ];
+        ]
 
-        /* ==================================================
-           ESTADO DEL JUEGO
-           ================================================== */
-        let currentQuestion = 0;
-        let score = 0;
-        let streak = 0;
-        let maxStreak = 0;
-        let correctCount = 0;
-        let lives = 3;
-        
-        let timerInterval;
-        let timeLeft = 0;
-        let totalTime = 0;
-        
-        let deathReason = "";
-        let deathQNum = 0;
+        // Game variables
+        let currentQuestionIndex = 0
+        let lives = 3
+        let score = 0
+        let streak = 0
+        let maxStreak = 0
+        let timerInterval = null
+        let timeLeft = 25
+        let selectedAnswer = null
+        let gameOver = false
 
-        /* ==================================================
-           LÓGICA PRINCIPAL
-           ================================================== */
-        
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function initGame() {
-            currentQuestion = 0;
-            score = 0;
-            streak = 0;
-            maxStreak = 0;
-            correctCount = 0;
-            lives = 3;
-            updateMetrics();
-            updateLivesUI();
-            
-            // Reset animaciones derrota/victoria
-            document.getElementById('tomb').classList.remove('animate');
-            document.getElementById('worm').classList.remove('animate');
-            document.getElementById('rip-title').classList.remove('animate');
-            document.getElementById('victory-trophy').classList.remove('animate');
-            
-            showScreen('screen-start');
-        }
+        // Tailwind script already loaded
 
         function startGame() {
-            showScreen('screen-game');
-            loadQuestion();
+            document.getElementById('start-screen').classList.add('hidden')
+            document.getElementById('game-screen').classList.remove('hidden')
+            resetGame()
+            loadQuestion()
+        }
+
+        function resetGame() {
+            currentQuestionIndex = 0
+            lives = 3
+            score = 0
+            streak = 0
+            maxStreak = 0
+            gameOver = false
+            updateLives()
+            updateScore()
+            updateStreak()
+        }
+
+        function updateLives() {
+            const container = document.getElementById('lives-container')
+            container.innerHTML = ''
+            for (let i = 1; i <= 3; i++) {
+                const icon = document.createElement('div')
+                icon.className = `text-3xl life-icon ${i > lives ? 'text-gray-600 line-through' : 'text-[#00D4FF]' }`
+                icon.innerHTML = i > lives ? '🔒' : '🔓'
+                container.appendChild(icon)
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = String(score).padStart(4, '0')
+        }
+
+        function updateStreak() {
+            document.getElementById('streak').textContent = streak
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex) / 15) * 100
+            document.getElementById('progress-fill').style.width = `${progress}%`
+            document.getElementById('progress-text').textContent = `${currentQuestionIndex + 1}/15`
         }
 
         function loadQuestion() {
-            // Reset UI
-            document.getElementById('btn-next').classList.remove('show');
-            document.getElementById('feedback-box').classList.remove('show');
-            
-            const q = questionsData[currentQuestion];
-            
-            // Textos
-            document.getElementById('q-number').textContent = `Pregunta ${currentQuestion + 1} de 15`;
-            document.getElementById('q-badge').textContent = q.badge;
-            document.getElementById('q-narrative').textContent = q.narrative;
-            document.getElementById('q-text').textContent = q.text;
-            
-            // Barra de progreso
-            const progress = (currentQuestion / 15) * 100;
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-            
-            // Opciones
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-            q.options.forEach((opt, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.textContent = `${String.fromCharCode(65 + index)}) ${opt}`;
-                btn.onclick = () => handleAnswer(index);
-                optionsContainer.appendChild(btn);
-            });
+            if (currentQuestionIndex >= questions.length) {
+                showWinScreen()
+                return
+            }
 
-            startTimer(q.time);
+            const q = questions[currentQuestionIndex]
+            
+            document.getElementById('room-badge').textContent = q.badge
+            document.getElementById('situation-text').textContent = q.situation
+            document.getElementById('question-text').textContent = q.question
+            
+            // Reset timer
+            timeLeft = q.time
+            updateTimerDisplay()
+            
+            // Clear previous feedback
+            document.getElementById('feedback-area').classList.add('hidden')
+            document.getElementById('continue-btn').classList.add('hidden')
+            
+            // Render options
+            const container = document.getElementById('options-container')
+            container.innerHTML = ''
+            
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('button')
+                btn.className = `panel w-full text-left p-6 bg-[#111827] border border-gray-700 hover:border-[#FF6B00] rounded-2xl text-lg transition-all`
+                btn.innerHTML = `
+                    <span class="inline-block w-8 text-[#00D4FF]">${String.fromCharCode(65 + index)}.</span>
+                    ${option.text}
+                `
+                btn.onclick = () => handleAnswer(index)
+                container.appendChild(btn)
+            })
+            
+            updateProgress()
+            startTimer()
         }
 
-        function startTimer(seconds) {
-            clearInterval(timerInterval);
-            totalTime = seconds;
-            timeLeft = seconds;
-            updateTimerUI();
-
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval)
+            
             timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimerUI();
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    handleTimeout();
+                timeLeft--
+                updateTimerDisplay()
+                
+                if (timeLeft <= 5) {
+                    document.getElementById('timer').classList.add('text-red-500', 'glitch')
+                } else if (timeLeft <= 12) {
+                    document.getElementById('timer').classList.add('text-yellow-400')
+                    document.getElementById('timer').classList.remove('text-red-500', 'glitch')
                 }
-            }, 1000);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval)
+                    handleTimeout()
+                }
+            }, 1000)
         }
 
-        function updateTimerUI() {
-            const bar = document.getElementById('timer-bar');
-            const text = document.getElementById('timer-text');
-            const pct = (timeLeft / totalTime) * 100;
-            
-            bar.style.width = `${pct}%`;
-            text.textContent = `${timeLeft}s`;
-            
-            // Colores
-            if (pct > 50) {
-                bar.style.backgroundColor = 'var(--accent-cyan)';
-            } else if (pct > 25) {
-                bar.style.backgroundColor = 'var(--warning-color)';
-            } else {
-                bar.style.backgroundColor = 'var(--wrong-color)';
-            }
-
-            if (timeLeft <= 5 && timeLeft > 0) {
-                text.classList.add('blink');
-            } else {
-                text.classList.remove('blink');
-            }
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-            document.getElementById('timer-text').classList.remove('blink');
+        function updateTimerDisplay() {
+            const el = document.getElementById('time-left')
+            el.textContent = timeLeft
         }
 
         function handleAnswer(selectedIndex) {
-            stopTimer();
-            const q = questionsData[currentQuestion];
-            const isCorrect = (selectedIndex === q.correctIndex);
+            clearInterval(timerInterval)
             
-            if (isCorrect) {
-                streak++;
-                if (streak > maxStreak) maxStreak = streak;
-                
-                let pointsGained = 10;
-                if (streak === 2) pointsGained += 10;
-                if (streak >= 3) pointsGained += 20;
-                score += pointsGained;
-                correctCount++;
-                
-                processFeedback(isCorrect, selectedIndex);
+            const q = questions[currentQuestionIndex]
+            const optionsBtns = document.getElementById('options-container').children
+            
+            // Disable all
+            for (let btn of optionsBtns) btn.onclick = null
+            
+            const correctIndex = q.options.findIndex(opt => opt.correct)
+            
+            // Highlight correct
+            optionsBtns[correctIndex].classList.add('border-green-500', 'bg-green-900/30')
+            
+            // Highlight selected if wrong
+            if (selectedIndex !== correctIndex) {
+                optionsBtns[selectedIndex].classList.add('border-red-500', 'bg-red-900/30')
+                loseLife(false) // wrong answer
             } else {
-                streak = 0;
-                lives--;
-                deathReason = "respuesta incorrecta";
-                deathQNum = currentQuestion + 1;
-                
-                showScareOverlay("wrong", () => {
-                    processFeedback(isCorrect, selectedIndex);
-                });
+                // Correct
+                const points = 10 + (streak >= 3 ? 20 : streak >= 2 ? 10 : 0)
+                score += points
+                streak++
+                if (streak > maxStreak) maxStreak = streak
+                updateScore()
+                updateStreak()
+                showFeedback(true, q.feedbackCorrect)
             }
+            
+            document.getElementById('continue-btn').classList.remove('hidden')
         }
 
         function handleTimeout() {
-            streak = 0;
-            lives--;
-            deathReason = "tiempo agotado";
-            deathQNum = currentQuestion + 1;
+            const optionsBtns = document.getElementById('options-container').children
+            const q = questions[currentQuestionIndex]
+            const correctIndex = q.options.findIndex(opt => opt.correct)
             
-            showScareOverlay("timeout", () => {
-                processFeedback(false, -1);
-            });
+            optionsBtns[correctIndex].classList.add('border-green-500', 'bg-green-900/30')
+            
+            for (let btn of optionsBtns) btn.onclick = null
+            
+            loseLife(true) // timeout
+            document.getElementById('continue-btn').classList.remove('hidden')
         }
 
-        function processFeedback(isCorrect, selectedIndex) {
-            updateMetrics();
-            updateLivesUI();
+        function showFeedback(isCorrect, message) {
+            const feedbackArea = document.getElementById('feedback-area')
+            feedbackArea.classList.remove('hidden')
             
-            const q = questionsData[currentQuestion];
-            const btns = document.querySelectorAll('.option-btn');
-            
-            // Deshabilitar y colorear
-            btns.forEach((btn, idx) => {
-                btn.disabled = true;
-                if (idx === q.correctIndex) {
-                    btn.classList.add('correct');
-                    if (selectedIndex === -1) btn.classList.add('was-correct'); // Timeout
-                } else if (idx === selectedIndex) {
-                    btn.classList.add('wrong');
-                }
-            });
-
-            // Caja de feedback
-            const fbBox = document.getElementById('feedback-box');
-            const fbTitle = document.getElementById('feedback-title');
-            const fbText = document.getElementById('feedback-text');
-            
-            fbBox.className = 'feedback-box show';
-            if (isCorrect) {
-                fbBox.classList.add('success');
-                fbTitle.textContent = '✓ Correcto';
-                fbTitle.style.color = 'var(--correct-color)';
-                fbText.textContent = q.feedbackCorrect;
-            } else {
-                fbBox.classList.add('error');
-                fbTitle.textContent = selectedIndex === -1 ? '⌛ Tiempo Agotado' : '✗ Incorrecto';
-                fbTitle.style.color = 'var(--wrong-color)';
-                fbText.textContent = q.feedbackWrong;
-            }
-
-            // Botón siguiente
-            const btnNext = document.getElementById('btn-next');
-            if (lives <= 0 || currentQuestion === 14) {
-                btnNext.textContent = "Ver resultado final &rarr;";
-            } else {
-                btnNext.textContent = "Siguiente decisión &rarr;";
-            }
-            btnNext.classList.add('show');
+            document.getElementById('feedback-icon').innerHTML = isCorrect ? '✅' : '❌'
+            document.getElementById('feedback-text').innerHTML = message
         }
 
-        function nextAction() {
+        function loseLife(isTimeout) {
+            lives--
+            updateLives()
+            streak = 0
+            updateStreak()
+            
+            showLifeLostOverlay(isTimeout)
+            
             if (lives <= 0) {
-                showDefeat();
-            } else if (currentQuestion === 14) {
-                showVictory();
-            } else {
-                currentQuestion++;
-                loadQuestion();
+                setTimeout(() => {
+                    showGameOver()
+                }, 1600)
             }
         }
 
-        /* ==================================================
-           EFECTOS Y ACTUALIZACIONES DE UI
-           ================================================== */
-        
-        function updateMetrics() {
-            document.getElementById('metric-q').textContent = `${currentQuestion + 1}/15`;
-            document.getElementById('metric-score').textContent = score;
-            document.getElementById('metric-streak').textContent = streak;
-        }
-
-        function updateLivesUI() {
-            const statusText = document.getElementById('lives-text');
-            for (let i = 1; i <= 3; i++) {
-                const circle = document.getElementById(`life-${i}`);
-                if (i <= lives) circle.classList.remove('lost');
-                else circle.classList.add('lost');
+        function showLifeLostOverlay(isTimeout) {
+            const overlay = document.getElementById('life-lost-overlay')
+            const iconEl = document.getElementById('overlay-icon')
+            const titleEl = document.getElementById('overlay-title')
+            const subEl = document.getElementById('overlay-subtitle')
+            
+            if (isTimeout) {
+                iconEl.textContent = '⏰'
+                titleEl.textContent = '¡TIEMPO AGOTADO!'
+                subEl.textContent = lives === 2 ? 
+                    'El reloj no perdona. Acceso revocado.' : 
+                    'Último acceso disponible. Concentrate.'
+            } else {
+                iconEl.textContent = lives === 2 ? '🚨' : '🔴'
+                titleEl.textContent = lives === 2 ? '¡ACCESO DENEGADO!' : '¡ALERTA CRÍTICA!'
+                subEl.textContent = lives === 2 ? 
+                    'Sistema comprometido. Quedan 2 accesos de seguridad.' : 
+                    'Último acceso disponible. Un error más y todo termina.'
             }
             
-            if (lives === 3) {
-                statusText.textContent = "Empresa saludable";
-                statusText.style.color = "var(--text-main)";
-            } else if (lives === 2) {
-                statusText.textContent = "Bajo presión";
-                statusText.style.color = "var(--warning-color)";
-            } else if (lives === 1) {
-                statusText.textContent = "Al borde del colapso";
-                statusText.style.color = "var(--wrong-color)";
-            } else {
-                statusText.textContent = "Bancarrota";
-                statusText.style.color = "#475569";
-            }
-        }
-
-        function showScareOverlay(reason, callback) {
-            const overlay = document.getElementById('scare-overlay');
-            const icon = document.getElementById('scare-icon');
-            const title = document.getElementById('scare-title');
-            const subtitle = document.getElementById('scare-subtitle');
+            overlay.classList.remove('hidden')
+            iconEl.classList.add('shake')
             
-            if (lives === 2) {
-                if (reason === 'wrong') {
-                    icon.textContent = '💀';
-                    title.textContent = '¡VIDA PERDIDA!';
-                    subtitle.textContent = 'NovaTech sangra. Dos chances más.';
-                } else {
-                    icon.textContent = '⏰';
-                    title.textContent = '¡SE ACABÓ EL TIEMPO!';
-                    subtitle.textContent = 'El mercado no espera. Perdiste una vida.';
-                }
-            } else if (lives === 1) {
-                if (reason === 'wrong') {
-                    icon.textContent = '🔥';
-                    title.textContent = '¡LA EMPRESA SE QUEMA!';
-                    subtitle.textContent = 'Solo te queda una vida. No hay margen.';
-                } else {
-                    icon.textContent = '⌛';
-                    title.textContent = '¡TIEMPO AGOTADO!';
-                    subtitle.textContent = 'Última oportunidad. El directorio te observa.';
-                }
-            } else {
-                icon.textContent = '💥';
-                title.textContent = '¡COLAPSO TOTAL!';
-                subtitle.textContent = 'NovaTech ha quebrado.';
-            }
-
-            overlay.classList.add('show');
             setTimeout(() => {
-                overlay.classList.remove('show');
-                if(callback) callback();
-            }, 1400);
+                overlay.classList.add('hidden')
+                iconEl.classList.remove('shake')
+            }, 1400)
         }
 
-        function showDefeat() {
-            showScreen('screen-defeat');
-            document.getElementById('defeat-score').textContent = score;
-            document.getElementById('defeat-correct').textContent = `${correctCount}/15`;
-            document.getElementById('defeat-subtitle').textContent = `La empresa quebró en la pregunta ${deathQNum} por ${deathReason}.`;
-            
-            setTimeout(() => document.getElementById('tomb').classList.add('animate'), 100);
-            setTimeout(() => document.getElementById('worm').classList.add('animate'), 100);
-            setTimeout(() => document.getElementById('rip-title').classList.add('animate'), 100);
+        function nextQuestion() {
+            currentQuestionIndex++
+            loadQuestion()
         }
 
-        function showVictory() {
-            showScreen('screen-victory');
-            document.getElementById('victory-score').textContent = score;
-            document.getElementById('victory-correct').textContent = `${correctCount}/15`;
-            document.getElementById('victory-streak').textContent = maxStreak;
+        function showGameOver() {
+            document.getElementById('game-screen').classList.add('hidden')
+            const loseScreen = document.getElementById('game-over-screen')
+            loseScreen.classList.remove('hidden')
             
-            const pct = (correctCount / 15) * 100;
-            const titleEl = document.getElementById('victory-title');
-            const msgEl = document.getElementById('victory-msg');
-            const descEl = document.getElementById('victory-desc');
-            const trophyEl = document.getElementById('victory-trophy');
+            document.getElementById('final-score-lose').textContent = String(score).padStart(4, '0')
+            document.getElementById('final-rooms-lose').textContent = `${currentQuestionIndex}/15`
             
-            setTimeout(() => trophyEl.classList.add('animate'), 100);
+            const worm = document.getElementById('game-over-worm')
+            setTimeout(() => {
+                worm.classList.remove('hidden')
+            }, 1800)
+        }
 
-            if (pct >= 90) {
-                titleEl.textContent = "NovaTech es una ExO";
-                trophyEl.textContent = "🏆";
-                msgEl.textContent = "Superaste la crisis con excelencia.";
-                descEl.textContent = "Demostraste comprensión profunda de la lógica exponencial. Entendés que el mundo cambió de naturaleza y que la única respuesta válida es un modelo completamente distinto. Ismail estaría orgulloso.";
-            } else if (pct >= 70) {
-                titleEl.textContent = "NovaTech sobrevivió";
-                trophyEl.textContent = "🎯";
-                titleEl.style.color = "var(--warning-color)";
-                msgEl.textContent = "Evitaste la quiebra, pero hay trabajo por hacer.";
-                descEl.textContent = "Manejaste bien los conceptos fundamentales. Algunas tensiones internas quedaron sin resolver, pero la dirección es la correcta. Con más práctica, la transformación completa es posible.";
+        function showWinScreen() {
+            document.getElementById('game-screen').classList.add('hidden')
+            const winScreen = document.getElementById('win-screen')
+            winScreen.classList.remove('hidden')
+            
+            const percentage = Math.round((currentQuestionIndex / 15) * 100)
+            
+            let trophy = '🏆'
+            let title = ''
+            let message = ''
+            
+            if (percentage >= 90) {
+                trophy = '🏆'
+                title = '¡ESCAPE COMPLETADO — NovaTech es una ExO!'
+                message = 'Demostraste comprensión profunda de la lógica exponencial. Entendés que el mundo cambió de naturaleza y que la única respuesta válida es un modelo completamente distinto. Ismail estaría orgulloso.'
+            } else if (percentage >= 70) {
+                trophy = '🎯'
+                title = '¡ESCAPASTE — NovaTech sobrevivió!'
+                message = 'Manejaste bien los conceptos fundamentales. Algunas puertas se resistieron, pero la dirección es correcta. Con más práctica, el escape completo es posible.'
             } else {
-                titleEl.textContent = "NovaTech resistió, por ahora";
-                trophyEl.textContent = "🌱";
-                titleEl.style.color = "var(--accent-orange)";
-                msgEl.textContent = "Sobreviviste raspando. El mercado sigue acechando.";
-                descEl.textContent = "Entendés los conceptos pero la aplicación al caso concreto todavía tiene margen de crecimiento. La próxima disrupción va a requerir más velocidad y más profundidad de análisis.";
+                trophy = '🌱'
+                title = 'Escapaste por poco — NovaTech sigue en riesgo'
+                message = 'Entendés los conceptos pero la aplicación al caso concreto necesita más práctica. La próxima disrupción va a requerir más velocidad y más profundidad.'
+            }
+            
+            document.getElementById('win-trophy').textContent = trophy
+            document.getElementById('win-title').innerHTML = title
+            document.getElementById('win-message').textContent = message
+            
+            document.getElementById('final-score-win').textContent = String(score).padStart(4, '0')
+            document.getElementById('final-rooms-win').textContent = '15/15'
+            document.getElementById('max-streak-win').textContent = maxStreak
+        }
+
+        function restartGame() {
+            document.getElementById('game-over-screen').classList.add('hidden')
+            document.getElementById('win-screen').classList.add('hidden')
+            document.getElementById('start-screen').classList.remove('hidden')
+        }
+
+        function exitToStart() {
+            if (confirm('¿Estás seguro que deseas salir?')) {
+                document.getElementById('game-screen').classList.add('hidden')
+                document.getElementById('start-screen').classList.remove('hidden')
             }
         }
 
-        // Iniciar
-        window.onload = initGame;
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('game-screen').classList.contains('hidden')) return
+            
+            if (e.key === 'Escape') {
+                exitToStart()
+            }
+        })
+
+        // Initialize Tailwind
+        function init() {
+            console.log('%cNovaTech Sala de Crisis cargada correctamente', 'color:#00D4FF; font-family:monospace')
+        }
+
+        window.onload = init
     </script>
 </body>
 </html>
